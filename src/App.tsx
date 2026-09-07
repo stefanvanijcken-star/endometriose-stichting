@@ -29,8 +29,23 @@ const footerColumns = [
   ['Over de stichting', 'Over ons', 'Contact', 'Word vrijwilliger', 'Voor zorgprofessionals', 'Steun ons'],
 ];
 
-function Button({ children, variant = 'primary', onClick, full = false }: { children: React.ReactNode; variant?: 'primary' | 'orange' | 'white' | 'outline'; onClick?: () => void; full?: boolean }) {
-  return <button className={`button button--${variant}${full ? ' button--full' : ''}`} onClick={onClick}>{children}</button>;
+const testQuestions = [
+  'Vanaf de eerste menstruaties heb ik al hevige menstruatiepijn die niet goed reageert op pijnstillers.',
+  'Door mijn menstruatieproblemen ben ik al vroeg aan de pil begonnen.',
+  'De menstruatiepijn verdwijnt niet tijdens de pil of komt snel weer terug.',
+  'Door mijn menstruatieproblemen moet ik soms van school, werk, sport e.d. verzuimen.',
+  'Endometriose komt bij mij in de familie voor.',
+  'Voor, tijdens of na de menstruatie heb ik last met mijn stoelgang en/of plassen.',
+  'Seksuele activiteit zorgt voor klachten in de onderbuik.',
+  'Ik heb doorbraakbloedingen tijdens pilgebruik.',
+];
+
+const getPageHref = (label: string) => label === 'Doe de Endometriosetest' ? '/endometriosetest' : '#';
+
+function Button({ children, variant = 'primary', onClick, full = false, href }: { children: React.ReactNode; variant?: 'primary' | 'orange' | 'white' | 'outline'; onClick?: () => void; full?: boolean; href?: string }) {
+  const className = `button button--${variant}${full ? ' button--full' : ''}`;
+  if (href) return <a className={className} href={href}>{children}</a>;
+  return <button className={className} onClick={onClick}>{children}</button>;
 }
 
 function Header() {
@@ -45,21 +60,21 @@ function Header() {
     'Over ons': [['De stichting', ['Over de stichting', 'Wat we doen', 'Team en vrijwilligers', 'Samenwerkingen']], ['Meedoen en transparantie', ['Word vrijwilliger', 'Voor zorgprofessionals', 'Jaarverslagen en ANBI', 'Contact']]],
   };
   return <header className={`header${mobileOpen ? ' header--open' : ''}${active ? ' header--mega-open' : ''}`} onMouseLeave={() => setActive(null)}>
-    <a className="logo" href="#top" aria-label="Endometriose Stichting"><img src="/images/logo.svg" alt="Endometriose Stichting" /></a>
+    <a className="logo" href="/" aria-label="Endometriose Stichting"><img src="/images/logo.svg" alt="Endometriose Stichting" /></a>
     <nav className="desktop-nav" aria-label="Hoofdnavigatie">
       {Object.keys(menus).map(label => <div className="nav-item" key={label} onMouseEnter={() => setActive(label)}>
         <button className={`nav-trigger${active === label ? ' nav-trigger--active' : ''}`} aria-expanded={active === label} onClick={() => setActive(label)}>{label}<img src="/images/chevron.svg" alt="" /></button>
       </div>)}
     </nav>
-    <div className="header-actions"><Button variant="orange"><img src="/images/donate.svg" alt="" />Doneer</Button><Button>Doe de test</Button></div>
+    <div className="header-actions"><Button variant="orange" href="/doneren"><img src="/images/donate.svg" alt="" />Doneer</Button><Button href="/endometriosetest">Doe de test</Button></div>
     <button className="menu-button" aria-label="Menu openen" aria-expanded={mobileOpen} onClick={() => setMobileOpen(!mobileOpen)}><img src={mobileOpen ? '/images/close.svg' : '/images/menu.svg'} alt="" /></button>
-    {active && <div className="desktop-mega">{menus[active].map(([heading, links]) => <div className="mega-column" key={heading}><strong>{heading}</strong>{links.map(link => <a href="#" key={link}>{link}</a>)}</div>)}</div>}
-    {mobileOpen && <nav className="mobile-nav">{Object.keys(menus).map(label => <div className="mobile-menu-group" key={label}><button className={mobileSection === label ? 'active' : ''} onClick={() => setMobileSection(mobileSection === label ? null : label)}>{label}<img src="/images/chevron.svg" alt="" /></button>{mobileSection === label && <div className="mobile-submenu">{menus[label].map(([heading, links]) => <div key={heading}><strong>{heading}</strong>{links.map(link => <a href="#" key={link}>{link}</a>)}</div>)}</div>}</div>)}<div className="mobile-nav-actions"><Button variant="orange" full><img src="/images/donate.svg" alt="" />Doneer</Button><Button full>Doe de endometriosetest</Button></div></nav>}
+    {active && <div className="desktop-mega">{menus[active].map(([heading, links]) => <div className="mega-column" key={heading}><strong>{heading}</strong>{links.map(link => <a href={getPageHref(link)} key={link}>{link}</a>)}</div>)}</div>}
+    {mobileOpen && <nav className="mobile-nav">{Object.keys(menus).map(label => <div className="mobile-menu-group" key={label}><button className={mobileSection === label ? 'active' : ''} onClick={() => setMobileSection(mobileSection === label ? null : label)}>{label}<img src="/images/chevron.svg" alt="" /></button>{mobileSection === label && <div className="mobile-submenu">{menus[label].map(([heading, links]) => <div key={heading}><strong>{heading}</strong>{links.map(link => <a href={getPageHref(link)} key={link}>{link}</a>)}</div>)}</div>}</div>)}<div className="mobile-nav-actions"><Button variant="orange" full href="/doneren"><img src="/images/donate.svg" alt="" />Doneer</Button><Button full href="/endometriosetest">Doe de endometriosetest</Button></div></nav>}
   </header>;
 }
 
 function Hero() { return <section className="hero" id="top">
-  <div className="hero-main"><div className="hero-copy"><h1>Je klachten verdienen aandacht.</h1><p>Endometriose kan grote invloed hebben op je dagelijks leven. Herken de klachten, krijg betrouwbare informatie en ontdek welke stap je nu kunt nemen.</p></div><div className="button-row"><Button>Doe de endometriosetest</Button><Button variant="white">Wat is endometriose?</Button></div></div>
+  <div className="hero-main"><div className="hero-copy"><h1>Je klachten verdienen aandacht.</h1><p>Endometriose kan grote invloed hebben op je dagelijks leven. Herken de klachten, krijg betrouwbare informatie en ontdek welke stap je nu kunt nemen.</p></div><div className="button-row"><Button href="/endometriosetest">Doe de endometriosetest</Button><Button variant="white">Wat is endometriose?</Button></div></div>
   <div className="hero-meta"><div className="diagnosis"><strong>Heb je al een diagnose?</strong><span>Vind <u>hier</u> informatie en ondersteuning die bij jou past.</span></div><div><strong>1 op de 10</strong><span>vrouwen heeft endometriose</span></div></div>
   </section>; }
 
@@ -67,7 +82,7 @@ function SectionHeading({ title, copy, action }: { title: string; copy: string; 
 
 function Symptoms() { return <section className="section symptoms"><SectionHeading title="Herken je dit?" copy="Endometriose uit zich bij iedereen anders. Klachten kunnen tijdens de menstruatie optreden, maar ook op andere momenten." action={<Button>Bekijk alle klachten</Button>} /><div className="symptoms-layout"><div className="symptom-grid">{symptoms.map(([title, copy]) => <article className="soft-card" key={title}><h3>{title}</h3><p>{copy}</p></article>)}</div><img className="symptoms-image" src="/images/image-4.jpg" alt="Vrouw met buikpijn" /></div><div className="mobile-section-action"><Button full>Bekijk alle klachten</Button></div></section>; }
 
-function TestSection() { const [answer, setAnswer] = useState('Ja'); return <section className="section test-section"><div className="test-copy"><SectionHeading title="Zijn jouw klachten normaal?" copy="Beantwoord acht korte vragen over je klachten. De test stelt geen diagnose, maar helpt je bepalen of het verstandig is om je klachten met je huisarts te bespreken." /><ul className="facts"><li><img src="/images/test-questions.svg" alt="" />8 vragen</li><li><img src="/images/test-time.svg" alt="" />Ongeveer 2 minuten</li><li><img src="/images/test-insight.svg" alt="" />Direct inzicht in mogelijke vervolgstappen</li></ul><Button>Start de test</Button></div><div className="question-card"><small>4/8</small><h3>Moet je door je menstruatieklachten soms thuisblijven van school, werk of sport?</h3><div className="radio-list">{['Ja', 'Nee', 'Weet ik niet'].map(option => <label key={option}><input type="radio" name="answer" checked={answer === option} onChange={() => setAnswer(option)} />{option}</label>)}</div></div></section>; }
+function TestSection() { const [answer, setAnswer] = useState('Ja'); return <section className="section test-section"><div className="test-copy"><SectionHeading title="Zijn jouw klachten normaal?" copy="Beantwoord acht korte vragen over je klachten. De test stelt geen diagnose, maar helpt je bepalen of het verstandig is om je klachten met je huisarts te bespreken." /><ul className="facts"><li><img src="/images/test-questions.svg" alt="" />8 vragen</li><li><img src="/images/test-time.svg" alt="" />Ongeveer 2 minuten</li><li><img src="/images/test-insight.svg" alt="" />Direct inzicht in mogelijke vervolgstappen</li></ul><Button href="/endometriosetest">Start de test</Button></div><div className="question-card"><small>4/8</small><h3>Moet je door je menstruatieklachten soms thuisblijven van school, werk of sport?</h3><div className="radio-list">{['Ja', 'Nee', 'Weet ik niet'].map(option => <label key={option}><input type="radio" name="answer" checked={answer === option} onChange={() => setAnswer(option)} />{option}</label>)}</div></div></section>; }
 
 function Routes() { return <section className="section routes"><SectionHeading title="Waar sta jij?" copy="Iedere situatie is anders. Kies wat het beste bij jou past, dan helpen we je gericht verder." /><div className="route-grid">{routes.map(([title, copy, action]) => <article className="soft-card route-card" key={title}><div><h3>{title}</h3><p>{copy}</p></div><Button variant="outline">{action}</Button></article>)}</div></section>; }
 
@@ -105,7 +120,7 @@ function Donation() {
           <span className="custom-amount-field"><span aria-hidden="true">€</span><input autoFocus inputMode="decimal" min="1" step="1" type="number" value={customAmount} onChange={(event) => setCustomAmount(event.target.value)} placeholder="Bijvoorbeeld 25" aria-label="Eigen donatiebedrag in euro" /></span>
         </label>}
       </div>
-      <Button variant="orange">Doneer nu</Button>
+      <Button variant="orange" href="/doneren">Doneer nu</Button>
     </div>
     <small className="donation-note donation-note--mobile">Eenmalig of periodiek. Elk bedrag helpt.</small>
   </section>;
@@ -113,6 +128,125 @@ function Donation() {
 
 function Choice({ label, options, value, onChange }: { label: string; options: string[]; value: string; onChange: (v:string)=>void }) { return <div className="choice"><p>{label}</p><div>{options.map(option => <button className={value === option ? 'selected' : ''} onClick={() => onChange(option)} key={option}>{option}</button>)}</div></div>; }
 
-function Footer() { return <footer><div className="footer-main"><div className="footer-brand"><div className="footer-brand-copy"><img src="/images/footer-logo.svg" alt="Endometriose Stichting" /><p>Voor erkenning, betrouwbare kennis en betere endometriosezorg.</p></div><Button variant="white" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}><img src="/images/top-arrow.svg" alt="" />Naar boven</Button></div><div className="footer-columns">{footerColumns.map(([title,...links]) => <div key={title}><h3>{title}</h3>{links.map(link => <a href="#" key={link}>{link}</a>)}</div>)}</div></div><div className="footer-bottom"><strong>© Endometriose Stichting</strong><div><a href="#">Privacy</a><a href="#">Cookies</a><a href="#">Disclaimer</a><a href="#">Toegangkelijkheid</a></div><span>ANBI/RSIN nummer: 8156.17.987</span></div></footer>; }
+function DonationPageForm() {
+  const [frequency, setFrequency] = useState('Maandelijks');
+  const [amount, setAmount] = useState('7');
+  const [customAmount, setCustomAmount] = useState('');
 
-export default function App() { return <><Header /><main><Hero /><Symptoms /><TestSection /><Routes /><Experts /><Stories /><Agenda /><About /><Donation /></main><Footer /></>; }
+  return <div className="donation-page-form">
+    <div className="choice-stack">
+      <Choice label="Hoe vaak wil je geven?" options={['Eenmalig', 'Maandelijks', 'Jaarlijks']} value={frequency} onChange={setFrequency} />
+      <Choice label={`Kies een ${frequency.toLowerCase()} bedrag`} options={['5', '7', '15', 'Anders']} value={amount} onChange={setAmount} />
+      {amount === 'Anders' && <label className="custom-amount">
+        <span>Vul je eigen bedrag in</span>
+        <span className="custom-amount-field"><span aria-hidden="true">€</span><input autoFocus inputMode="decimal" min="1" step="1" type="number" value={customAmount} onChange={(event) => setCustomAmount(event.target.value)} placeholder="Bijvoorbeeld 25" aria-label="Eigen donatiebedrag in euro" /></span>
+      </label>}
+    </div>
+    <Button variant="orange">Doneer nu</Button>
+  </div>;
+}
+
+function DonationPage() {
+  return <>
+    <Header />
+    <main className="donation-page" id="top">
+      <section className="donation-page-intro">
+        <div>
+          <h1>Help mensen sneller de juiste zorg te vinden.</h1>
+          <p>Met jouw bijdrage bieden we betrouwbare informatie, leiden we ervaringsdeskundigen op en zetten we ons in voor betere endometriosezorg.</p>
+        </div>
+      </section>
+      <section className="donation-page-content" aria-label="Donatie instellen">
+        <div className="donation-page-panel">
+          <img src="/images/image-10.jpg" alt="Twee vriendinnen die elkaar omhelzen" />
+          <DonationPageForm />
+        </div>
+      </section>
+    </main>
+    <Footer />
+  </>;
+}
+
+type TestAnswer = 'Ja' | 'Nee' | 'Weet ik niet';
+
+function TestHeader() {
+  return <header className="test-header">
+    <a className="logo" href="/" aria-label="Endometriose Stichting"><img src="/images/logo.svg" alt="Endometriose Stichting" /></a>
+    <Button href="/">Stop test</Button>
+  </header>;
+}
+
+function TestPage() {
+  const [questionIndex, setQuestionIndex] = useState(0);
+  const [answers, setAnswers] = useState<(TestAnswer | null)[]>(() => testQuestions.map(() => null));
+  const [finished, setFinished] = useState(false);
+  const currentAnswer = answers[questionIndex];
+  const yesCount = answers.filter(answer => answer === 'Ja').length;
+
+  const chooseAnswer = (answer: TestAnswer) => {
+    setAnswers(previous => previous.map((value, index) => index === questionIndex ? answer : value));
+  };
+
+  const goNext = () => {
+    if (!currentAnswer) return;
+    if (questionIndex === testQuestions.length - 1) {
+      setFinished(true);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    setQuestionIndex(index => index + 1);
+  };
+
+  const goBack = () => {
+    if (finished) {
+      setFinished(false);
+      return;
+    }
+    setQuestionIndex(index => Math.max(0, index - 1));
+  };
+
+  const restart = () => {
+    setAnswers(testQuestions.map(() => null));
+    setQuestionIndex(0);
+    setFinished(false);
+  };
+
+  return <>
+    <TestHeader />
+    <main className="endometriosis-test" id="top">
+      <div className="test-flow">
+        {(questionIndex > 0 || finished) && <button className="test-back" onClick={goBack}><img src="/images/test-back.svg" alt="" />{finished ? 'Terug naar de laatste vraag' : 'Vorige vraag'}</button>}
+        {!finished ? <section className="test-card" aria-labelledby="test-question">
+          <div className="test-question-heading">
+            <p>{questionIndex + 1}/{testQuestions.length}</p>
+            <h1 id="test-question">{testQuestions[questionIndex]}</h1>
+          </div>
+          <div className="test-options" role="radiogroup" aria-labelledby="test-question">
+            {(['Ja', 'Nee', 'Weet ik niet'] as TestAnswer[]).map(option => <button key={option} className={currentAnswer === option ? 'selected' : ''} role="radio" aria-checked={currentAnswer === option} onClick={() => chooseAnswer(option)}><img src={currentAnswer === option ? '/images/test-radio-checked.svg' : '/images/test-radio.svg'} alt="" />{option}</button>)}
+          </div>
+          <button className="test-next" onClick={goNext} disabled={!currentAnswer}>{questionIndex === testQuestions.length - 1 ? 'Bekijk mijn uitslag' : 'Volgende'}<img src="/images/test-next.svg" alt="" /></button>
+        </section> : <section className="test-card test-result" aria-labelledby="test-result-title">
+          <div className="test-question-heading">
+            <p>Jouw uitslag</p>
+            <h1 id="test-result-title">Je antwoordde {yesCount} van de 8 keer ‘Ja’.</h1>
+          </div>
+          {yesCount >= 3 ? <p className="test-advice">Heb je drie of meer stellingen met ‘Ja’ beantwoord? Bespreek je klachten dan met je huisarts. Vertel dat je vermoedt dat je endometriose of adenomyose hebt. Samen kunnen jullie bepalen welke vervolgstap passend is, bijvoorbeeld verder onderzoek of het starten van een behandeling.</p> : <p className="test-advice">Je hebt minder dan drie stellingen met ‘Ja’ beantwoord. Blijf goed naar je lichaam luisteren en bespreek klachten die je dagelijks leven beïnvloeden altijd met je huisarts.</p>}
+          <p className="test-disclaimer">Deze test kan endometriose niet aantonen of uitsluiten en vervangt geen medisch onderzoek.</p>
+          <div className="test-result-actions"><Button href="/">Terug naar home</Button><Button variant="outline" onClick={restart}>Doe de test opnieuw</Button></div>
+        </section>}
+      </div>
+    </main>
+    <Footer />
+  </>;
+}
+
+function Footer() { return <footer><div className="footer-main"><div className="footer-brand"><div className="footer-brand-copy"><img src="/images/footer-logo.svg" alt="Endometriose Stichting" /><p>Voor erkenning, betrouwbare kennis en betere endometriosezorg.</p></div><Button variant="white" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}><img src="/images/top-arrow.svg" alt="" />Naar boven</Button></div><div className="footer-columns">{footerColumns.map(([title,...links]) => <div key={title}><h3>{title}</h3>{links.map(link => <a href={getPageHref(link)} key={link}>{link}</a>)}</div>)}</div></div><div className="footer-bottom"><strong>© Endometriose Stichting</strong><div><a href="#">Privacy</a><a href="#">Cookies</a><a href="#">Disclaimer</a><a href="#">Toegangkelijkheid</a></div><span>ANBI/RSIN nummer: 8156.17.987</span></div></footer>; }
+
+function HomePage() { return <><Header /><main><Hero /><Symptoms /><TestSection /><Routes /><Experts /><Stories /><Agenda /><About /><Donation /></main><Footer /></>; }
+
+export default function App() {
+  const pathname = window.location.pathname.replace(/\/+$/, '') || '/';
+  if (pathname === '/doneren' || pathname === '/donatie') return <DonationPage />;
+  if (pathname === '/endometriosetest' || pathname === '/test') return <TestPage />;
+  return <HomePage />;
+}

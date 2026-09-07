@@ -30,6 +30,7 @@ footer{height:auto}.footer-main{height:auto;min-height:319px;align-items:flex-st
 .mobile-submenu a{font-weight:400;line-height:1.5}
 .choice>p,.choice button{line-height:1.4}.footer-brand-copy{display:flex;flex-direction:column;gap:8px}.footer-brand-copy>img{width:177px;height:48px}.footer-brand-copy p{width:272px}
 .mobile-nav .button{margin-top:0}
+.mobile-nav a.button{justify-content:center;padding:8px 24px}
 @media(max-width:700px){.footer-brand-copy>img{width:180px}}
 
 /* Responsive content sizing and interaction refinements. */
@@ -98,4 +99,71 @@ footer{height:auto}.footer-main{height:auto;min-height:319px;align-items:flex-st
   .footer-brand{width:100%}
   .header--open{height:88px;min-height:88px;padding-bottom:24px;flex-wrap:nowrap;align-content:normal}
   .header--open .mobile-nav{position:absolute;left:0;right:0;top:88px;width:auto;margin:0;max-height:none;overflow:visible;flex-basis:auto}
+}
+
+/* Donation page — Figma nodes 170:1227 and 175:364. */
+.donation-page{background:#fff}
+.donation-page-intro{padding:56px 48px;display:flex;justify-content:center}
+.donation-page-intro>div{width:100%;max-width:1000px;display:flex;flex-direction:column;gap:8px}
+.donation-page-intro h1{font-size:44px;line-height:1.2;letter-spacing:-.44px}
+.donation-page-intro p{color:var(--muted);max-width:1000px}
+.donation-page-content{padding:0 48px 56px;display:flex;justify-content:center}
+.donation-page-panel{width:100%;max-width:1240px;min-height:480px;background:var(--pale);border-radius:24px;overflow:hidden;display:grid;grid-template-columns:720px minmax(0,1fr);gap:24px;align-items:center}
+.donation-page-panel>img{display:block;width:100%;height:100%;min-height:480px;object-fit:cover;border-radius:24px}
+.donation-page-form{min-width:0;padding:24px 40px;display:flex;flex-direction:column;align-items:flex-start;gap:24px}
+.donation-page-form>.button{flex:none}
+
+@media(min-width:701px) and (max-width:1200px){
+  .donation-page-panel{grid-template-columns:minmax(0,1.2fr) minmax(360px,1fr)}
+  .donation-page-form{padding:24px}
+}
+
+@media(min-width:701px) and (max-width:900px){
+  .donation-page-panel{display:flex;flex-direction:column;align-items:stretch;gap:0}
+  .donation-page-panel>img{height:360px;min-height:360px}
+  .donation-page-form{width:100%}
+}
+
+@media(max-width:700px){
+  .donation-page-intro{padding:24px 16px}
+  .donation-page-intro>div{gap:12px}
+  .donation-page-intro h1{font-size:32px;line-height:1.2;letter-spacing:-.16px}
+  .donation-page-content{padding:0 16px 56px}
+  .donation-page-panel{min-height:0;display:flex;flex-direction:column;align-items:stretch;gap:0}
+  .donation-page-panel>img{height:auto;min-height:0;aspect-ratio:358/238.667;border-radius:24px;flex:none}
+  .donation-page-form{width:100%;padding:24px 16px}
+  .donation-page-form>.button{width:100%}
+}
+
+/* Endometriosetest — Figma nodes 118:1177 and 118:1379. */
+.test-header{height:112px;padding:32px 48px;background:#fff;display:flex;align-items:center;justify-content:space-between}
+.endometriosis-test{background:var(--pale);padding:80px 48px;display:flex;justify-content:center}
+.test-flow{width:640px;max-width:100%;display:flex;flex-direction:column;align-items:flex-start;gap:16px}
+.test-back{border:0;background:transparent;color:var(--magenta);padding:0;display:inline-flex;align-items:center;gap:2px;font-weight:400;line-height:1.5}
+.test-back img{width:20px;height:20px;flex:none;transform:rotate(90deg)}
+.test-card{width:100%;padding:24px;background:#fff;border-radius:24px;display:flex;flex-direction:column;align-items:flex-start;gap:24px}
+.test-question-heading{width:100%;display:flex;flex-direction:column;gap:8px}
+.test-question-heading>p{color:var(--magenta);font-size:16px;font-weight:500;line-height:1.4}
+.test-question-heading h1{width:100%;font-size:24px;line-height:1.2;letter-spacing:0}
+.test-options{width:100%;display:flex;flex-direction:column;gap:16px}
+.test-options>button{width:100%;min-height:72px;padding:24px;border:0;border-radius:24px;background:var(--pale);color:var(--ink);display:flex;align-items:center;gap:8px;text-align:left;font-size:20px;font-weight:500;line-height:1.4}
+.test-options>button.selected{background:var(--magenta);color:#fff}
+.test-options>button img{width:16px;height:16px;flex:none}
+.test-next{min-height:43px;padding:8px 24px;border:1px solid var(--magenta);border-radius:999px;background:var(--magenta);color:#fff;display:inline-flex;align-items:center;justify-content:center;gap:8px;font:inherit;font-weight:500;line-height:1.4}
+.test-next img{width:16px;height:16px;flex:none}
+.test-next:disabled{cursor:not-allowed;opacity:.45}
+.test-result h1{max-width:540px}
+.test-advice,.test-disclaimer{color:var(--muted)}
+.test-disclaimer{padding-top:24px;border-top:1px solid #eadfe5;width:100%}
+.test-result-actions{display:flex;flex-wrap:wrap;gap:12px}
+
+@media(max-width:700px){
+  .test-header{height:88px;padding:24px 16px}
+  .test-header .logo{width:147px;height:40px}
+  .endometriosis-test{padding:56px 16px}
+  .test-card{padding:24px}
+  .test-question-heading h1{font-size:24px;line-height:1.2;letter-spacing:0}
+  .test-next{width:100%}
+  .test-result-actions{width:100%;flex-direction:column}
+  .test-result-actions .button{width:100%}
 }
