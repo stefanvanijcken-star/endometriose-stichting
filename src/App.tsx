@@ -42,7 +42,7 @@ const testQuestions = [
 
 const getPageHref = (label: string) => label === 'Doe de Endometriosetest' ? '/endometriosetest' : '#';
 
-function Button({ children, variant = 'primary', onClick, full = false, href }: { children: React.ReactNode; variant?: 'primary' | 'orange' | 'white' | 'outline'; onClick?: () => void; full?: boolean; href?: string }) {
+function Button({ children, variant = 'primary', onClick, full = false, href }: { children: React.ReactNode; variant?: 'primary' | 'orange' | 'white' | 'outline' | 'magenta-outline'; onClick?: () => void; full?: boolean; href?: string }) {
   const className = `button button--${variant}${full ? ' button--full' : ''}`;
   if (href) return <a className={className} href={href}>{children}</a>;
   return <button className={className} onClick={onClick}>{children}</button>;
@@ -80,7 +80,7 @@ function Hero() { return <section className="hero" id="top">
 
 function SectionHeading({ title, copy, action }: { title: string; copy: string; action?: React.ReactNode }) { return <div className="section-heading"><div><h2>{title}</h2><p>{copy}</p></div>{action}</div>; }
 
-function Symptoms() { return <section className="section symptoms"><SectionHeading title="Herken je dit?" copy="Endometriose uit zich bij iedereen anders. Klachten kunnen tijdens de menstruatie optreden, maar ook op andere momenten." action={<Button>Bekijk alle klachten</Button>} /><div className="symptoms-layout"><div className="symptom-grid">{symptoms.map(([title, copy]) => <article className="soft-card" key={title}><h3>{title}</h3><p>{copy}</p></article>)}</div><img className="symptoms-image" src="/images/image-4.jpg" alt="Vrouw met buikpijn" /></div><div className="mobile-section-action"><Button full>Bekijk alle klachten</Button></div></section>; }
+function Symptoms() { return <section className="section symptoms" id="klachten"><SectionHeading title="Herken je dit?" copy="Endometriose uit zich bij iedereen anders. Klachten kunnen tijdens de menstruatie optreden, maar ook op andere momenten." action={<Button>Bekijk alle klachten</Button>} /><div className="symptoms-layout"><div className="symptom-grid">{symptoms.map(([title, copy]) => <article className="soft-card" key={title}><h3>{title}</h3><p>{copy}</p></article>)}</div><img className="symptoms-image" src="/images/image-4.jpg" alt="Vrouw met buikpijn" /></div><div className="mobile-section-action"><Button full>Bekijk alle klachten</Button></div></section>; }
 
 function TestSection() { const [answer, setAnswer] = useState('Ja'); return <section className="section test-section"><div className="test-copy"><SectionHeading title="Zijn jouw klachten normaal?" copy="Beantwoord acht korte vragen over je klachten. De test stelt geen diagnose, maar helpt je bepalen of het verstandig is om je klachten met je huisarts te bespreken." /><ul className="facts"><li><img src="/images/test-questions.svg" alt="" />8 vragen</li><li><img src="/images/test-time.svg" alt="" />Ongeveer 2 minuten</li><li><img src="/images/test-insight.svg" alt="" />Direct inzicht in mogelijke vervolgstappen</li></ul><Button href="/endometriosetest">Start de test</Button></div><div className="question-card"><small>4/8</small><h3>Moet je door je menstruatieklachten soms thuisblijven van school, werk of sport?</h3><div className="radio-list">{['Ja', 'Nee', 'Weet ik niet'].map(option => <label key={option}><input type="radio" name="answer" checked={answer === option} onChange={() => setAnswer(option)} />{option}</label>)}</div></div></section>; }
 
@@ -169,11 +169,49 @@ function DonationPage() {
 
 type TestAnswer = 'Ja' | 'Nee' | 'Weet ik niet';
 
-function TestHeader() {
+function TestHeader({ finished = false }: { finished?: boolean }) {
   return <header className="test-header">
     <a className="logo" href="/" aria-label="Endometriose Stichting"><img src="/images/logo.svg" alt="Endometriose Stichting" /></a>
-    <Button href="/">Stop test</Button>
+    <Button href="/">{finished ? 'Terug naar home' : 'Stop test'}</Button>
   </header>;
+}
+
+function TestResults({ yesCount, onBack, onDownload }: { yesCount: number; onBack: () => void; onDownload: () => void }) {
+  const shouldContactDoctor = yesCount >= 3;
+
+  return <>
+    <div className="test-result-primary">
+      <button className="test-back" onClick={onBack}><img src="/images/test-back.svg" alt="" />Terug naar de laatste vraag</button>
+      <section className="test-card test-result" aria-labelledby="test-result-title">
+        <div className="test-result-copy">
+          <div className="test-result-heading">
+            <p>Jouw uitslag</p>
+            <h1 id="test-result-title">{shouldContactDoctor ? 'Er is kans dat je endometriose hebt.' : 'Blijf luisteren naar je lichaam.'}</h1>
+            <strong>Je hebt {yesCount} van de 8 vragen met ‘ja’ beantwoord.</strong>
+          </div>
+          {shouldContactDoctor ? <p>Je antwoorden geven reden om je klachten verder te bespreken. Dat betekent niet automatisch dat je endometriose hebt. De test kan endometriose niet aantonen of uitsluiten.</p> : <div className="test-result-description"><p>Op basis van deze test krijg je niet automatisch het advies om contact op te nemen met je huisarts. De test kan endometriose echter niet aantonen of uitsluiten.</p><p>Heb je aanhoudende klachten, maak je je zorgen of word je in je dagelijkse leven beperkt? Bespreek je klachten dan alsnog met je huisarts.</p></div>}
+        </div>
+        <div className="test-result-callout"><img src="/images/test-result-info.svg" alt="" /><p>Bij drie of meer keer ‘ja’ adviseren we je contact op te nemen met je huisarts.</p></div>
+        <div className="test-result-actions">
+          {shouldContactDoctor ? <><Button>Bereid mijn huisartsbezoek voor</Button><Button variant="magenta-outline" href="/#klachten">Bekijk alle klachten</Button></> : <><Button href="/#klachten">Bekijk alle klachten</Button><Button variant="magenta-outline">Bereid een huisartsbezoek voor</Button></>}
+        </div>
+      </section>
+    </div>
+
+    {shouldContactDoctor && <section className="test-result-panel test-next-steps" aria-labelledby="next-steps-title">
+      <p className="test-result-eyebrow test-result-eyebrow--orange">Wat nu?</p>
+      <div className="test-step-list">
+        <div className="test-step"><div><h2 id="next-steps-title">Stap 1: Download de uitslag</h2><p>Klik op ‘Download mijn uitslag’ om jouw informatie te bewaren en terug te kijken. Je kan de uitslag ook meenemen naar de huisarts. Dit kan helpen om jouw klachten te bespreken. Het helpt de huisarts ook om te bepalen of je misschien endometriose hebt.</p></div><Button variant="outline" onClick={onDownload}>Download mijn uitslag</Button></div>
+        <div className="test-step"><div><h2>Stap 2: Maak een afspraak bij de huisarts</h2><p>Er is kans dat je endometriose hebt. Maak daarom een afspraak bij de huisarts. De huisarts zal je klachten met je bespreken en kan, met jouw toestemming, onderzoek doen.</p></div></div>
+        <div className="test-step"><div><h2>Stap 3: Neem de uitslag mee naar de huisarts</h2><p>Neem de uitslag mee naar de huisarts. Dit helpt de huisarts om te beoordelen of je misschien endometriose hebt. Als de huisarts denkt dat je endometriose hebt, kan er een behandeling worden gestart. Klik op ‘Bereid mijn huisartsbezoek voor’ voor meer informatie over de afspraak bij de huisarts.</p></div><Button variant="outline">Bereid mijn huisartsbezoek voor</Button></div>
+      </div>
+    </section>}
+
+    <section className="test-result-panel test-listening-card">
+      <div><p className={`test-result-eyebrow${shouldContactDoctor ? '' : ' test-result-eyebrow--orange'}`}>Een luisterend oor</p><div><h2>{shouldContactDoctor ? 'Wil je eerst met iemand praten?' : 'Wil je graag met iemand praten?'}</h2><p>Onze ervaringsdeskundige vrijwilligers denken met je mee.</p></div></div>
+      <Button variant={shouldContactDoctor ? 'magenta-outline' : 'outline'}>Stel je vraag</Button>
+    </section>
+  </>;
 }
 
 function TestPage() {
@@ -205,17 +243,22 @@ function TestPage() {
     setQuestionIndex(index => Math.max(0, index - 1));
   };
 
-  const restart = () => {
-    setAnswers(testQuestions.map(() => null));
-    setQuestionIndex(0);
-    setFinished(false);
+  const downloadResult = () => {
+    const answerLines = testQuestions.map((question, index) => `${index + 1}. ${question}\nAntwoord: ${answers[index] ?? 'Niet beantwoord'}`);
+    const resultText = `Uitslag Endometriosetest\n\nJe hebt ${yesCount} van de 8 vragen met ‘ja’ beantwoord.\n\n${answerLines.join('\n\n')}\n\nDeze test kan endometriose niet aantonen of uitsluiten.`;
+    const url = URL.createObjectURL(new Blob([resultText], { type: 'text/plain;charset=utf-8' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'uitslag-endometriosetest.txt';
+    link.click();
+    window.setTimeout(() => URL.revokeObjectURL(url), 0);
   };
 
   return <>
-    <TestHeader />
+    <TestHeader finished={finished} />
     <main className="endometriosis-test" id="top">
-      <div className="test-flow">
-        {(questionIndex > 0 || finished) && <button className="test-back" onClick={goBack}><img src="/images/test-back.svg" alt="" />{finished ? 'Terug naar de laatste vraag' : 'Vorige vraag'}</button>}
+      <div className={`test-flow${finished ? ' test-flow--results' : ''}`}>
+        {!finished && questionIndex > 0 && <button className="test-back" onClick={goBack}><img src="/images/test-back.svg" alt="" />Vorige vraag</button>}
         {!finished ? <section className="test-card" aria-labelledby="test-question">
           <div className="test-question-heading">
             <p>{questionIndex + 1}/{testQuestions.length}</p>
@@ -225,15 +268,7 @@ function TestPage() {
             {(['Ja', 'Nee', 'Weet ik niet'] as TestAnswer[]).map(option => <button key={option} className={currentAnswer === option ? 'selected' : ''} role="radio" aria-checked={currentAnswer === option} onClick={() => chooseAnswer(option)}><img src={currentAnswer === option ? '/images/test-radio-checked.svg' : '/images/test-radio.svg'} alt="" />{option}</button>)}
           </div>
           <button className="test-next" onClick={goNext} disabled={!currentAnswer}>{questionIndex === testQuestions.length - 1 ? 'Bekijk mijn uitslag' : 'Volgende'}<img src="/images/test-next.svg" alt="" /></button>
-        </section> : <section className="test-card test-result" aria-labelledby="test-result-title">
-          <div className="test-question-heading">
-            <p>Jouw uitslag</p>
-            <h1 id="test-result-title">Je antwoordde {yesCount} van de 8 keer ‘Ja’.</h1>
-          </div>
-          {yesCount >= 3 ? <p className="test-advice">Heb je drie of meer stellingen met ‘Ja’ beantwoord? Bespreek je klachten dan met je huisarts. Vertel dat je vermoedt dat je endometriose of adenomyose hebt. Samen kunnen jullie bepalen welke vervolgstap passend is, bijvoorbeeld verder onderzoek of het starten van een behandeling.</p> : <p className="test-advice">Je hebt minder dan drie stellingen met ‘Ja’ beantwoord. Blijf goed naar je lichaam luisteren en bespreek klachten die je dagelijks leven beïnvloeden altijd met je huisarts.</p>}
-          <p className="test-disclaimer">Deze test kan endometriose niet aantonen of uitsluiten en vervangt geen medisch onderzoek.</p>
-          <div className="test-result-actions"><Button href="/">Terug naar home</Button><Button variant="outline" onClick={restart}>Doe de test opnieuw</Button></div>
-        </section>}
+        </section> : <TestResults yesCount={yesCount} onBack={goBack} onDownload={downloadResult} />}
       </div>
     </main>
     <Footer />
