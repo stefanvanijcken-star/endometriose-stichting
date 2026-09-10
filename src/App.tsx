@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createTestResultPdf } from './testResultPdf';
 
 const symptoms = [
   ['Heftige menstruatiepijn', 'Pijn die je dagelijkse leven, school, werk of sport belemmert.'],
@@ -243,16 +244,7 @@ function TestPage() {
     setQuestionIndex(index => Math.max(0, index - 1));
   };
 
-  const downloadResult = () => {
-    const answerLines = testQuestions.map((question, index) => `${index + 1}. ${question}\nAntwoord: ${answers[index] ?? 'Niet beantwoord'}`);
-    const resultText = `Uitslag Endometriosetest\n\nJe hebt ${yesCount} van de 8 vragen met ‘ja’ beantwoord.\n\n${answerLines.join('\n\n')}\n\nDeze test kan endometriose niet aantonen of uitsluiten.`;
-    const url = URL.createObjectURL(new Blob([resultText], { type: 'text/plain;charset=utf-8' }));
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'uitslag-endometriosetest.txt';
-    link.click();
-    window.setTimeout(() => URL.revokeObjectURL(url), 0);
-  };
+  const downloadResult = () => createTestResultPdf(testQuestions, answers, yesCount);
 
   return <>
     <TestHeader finished={finished} />
