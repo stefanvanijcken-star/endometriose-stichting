@@ -64,13 +64,13 @@ function Header() {
     <a className="logo" href="/" aria-label="Endometriose Stichting"><img src="/images/logo.svg" alt="Endometriose Stichting" /></a>
     <nav className="desktop-nav" aria-label="Hoofdnavigatie">
       {Object.keys(menus).map(label => <div className="nav-item" key={label} onMouseEnter={() => setActive(label)}>
-        <button className={`nav-trigger${active === label ? ' nav-trigger--active' : ''}`} aria-expanded={active === label} onClick={() => setActive(label)}>{label}<img src="/images/chevron.svg" alt="" /></button>
+        <button className={`nav-trigger${active === label ? ' nav-trigger--active' : ''}`} aria-expanded={active === label} onClick={() => setActive(label)}>{label}<img src={active === label ? '/images/chevron-magenta.svg' : '/images/chevron.svg'} alt="" /></button>
       </div>)}
     </nav>
     <div className="header-actions"><Button variant="orange" href="/doneren"><img src="/images/donate.svg" alt="" />Doneer</Button><Button href="/endometriosetest">Doe de test</Button></div>
     <button className="menu-button" aria-label="Menu openen" aria-expanded={mobileOpen} onClick={() => setMobileOpen(!mobileOpen)}><img src={mobileOpen ? '/images/close.svg' : '/images/menu.svg'} alt="" /></button>
     {active && <div className="desktop-mega">{menus[active].map(([heading, links]) => <div className="mega-column" key={heading}><strong>{heading}</strong>{links.map(link => <a href={getPageHref(link)} key={link}>{link}</a>)}</div>)}</div>}
-    {mobileOpen && <nav className="mobile-nav">{Object.keys(menus).map(label => <div className="mobile-menu-group" key={label}><button className={mobileSection === label ? 'active' : ''} onClick={() => setMobileSection(mobileSection === label ? null : label)}>{label}<img src="/images/chevron.svg" alt="" /></button>{mobileSection === label && <div className="mobile-submenu">{menus[label].map(([heading, links]) => <div key={heading}><strong>{heading}</strong>{links.map(link => <a href={getPageHref(link)} key={link}>{link}</a>)}</div>)}</div>}</div>)}<div className="mobile-nav-actions"><Button variant="orange" full href="/doneren"><img src="/images/donate.svg" alt="" />Doneer</Button><Button full href="/endometriosetest">Doe de endometriosetest</Button></div></nav>}
+    {mobileOpen && <nav className="mobile-nav">{Object.keys(menus).map(label => <div className="mobile-menu-group" key={label}><button className={mobileSection === label ? 'active' : ''} onClick={() => setMobileSection(mobileSection === label ? null : label)}>{label}<img src={mobileSection === label ? '/images/chevron-magenta.svg' : '/images/chevron.svg'} alt="" /></button>{mobileSection === label && <div className="mobile-submenu">{menus[label].map(([heading, links]) => <div key={heading}><strong>{heading}</strong>{links.map(link => <a href={getPageHref(link)} key={link}>{link}</a>)}</div>)}</div>}</div>)}<div className="mobile-nav-actions"><Button variant="orange" full href="/doneren"><img src="/images/donate.svg" alt="" />Doneer</Button><Button full href="/endometriosetest">Doe de endometriosetest</Button></div></nav>}
   </header>;
 }
 

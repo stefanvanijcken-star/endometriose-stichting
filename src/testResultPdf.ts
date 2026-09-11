@@ -4,10 +4,11 @@ const colors = {
   ink: [22, 19, 22] as const,
   muted: [74, 68, 72] as const,
   magenta: [197, 42, 114] as const,
-  orange: [242, 138, 46] as const,
+  orange: [243, 134, 39] as const,
   pale: [252, 244, 248] as const,
   white: [255, 255, 255] as const,
-  line: [235, 222, 229] as const,
+  border: [248, 231, 240] as const,
+  divider: [236, 235, 236] as const,
 };
 
 async function fileAsBase64(url: string) {
@@ -45,7 +46,7 @@ async function svgAsPng(url: string, width: number, height: number) {
 
 export async function createTestResultPdf(questions: string[], answers: PdfAnswer[], yesCount: number) {
   const { jsPDF } = await import('jspdf');
-  const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait', compress: true });
+  const doc = new jsPDF({ unit: 'pt', format: 'a4', orientation: 'portrait', compress: true });
   const shouldContactDoctor = yesCount >= 3;
   let fontFamily = 'helvetica';
 
@@ -63,163 +64,177 @@ export async function createTestResultPdf(questions: string[], answers: PdfAnswe
     doc.addFont('HostGrotesk-Bold.ttf', 'HostGrotesk', 'bold');
     fontFamily = 'HostGrotesk';
   } catch {
-    // Helvetica keeps the PDF usable if a local font cannot be loaded.
+    // The PDF remains usable with Helvetica if a local font fails to load.
   }
 
   const setFont = (style: 'normal' | 'medium' | 'bold' = 'normal') => {
     doc.setFont(fontFamily, fontFamily === 'HostGrotesk' ? style : style === 'normal' ? 'normal' : 'bold');
   };
-  const setText = (color: readonly [number, number, number]) => doc.setTextColor(color[0], color[1], color[2]);
-  const setFill = (color: readonly [number, number, number]) => doc.setFillColor(color[0], color[1], color[2]);
-  const setDraw = (color: readonly [number, number, number]) => doc.setDrawColor(color[0], color[1], color[2]);
-  const writeWrapped = (text: string, x: number, y: number, width: number, fontSize: number, lineHeight: number) => {
-    doc.setFontSize(fontSize);
-    const lines = doc.splitTextToSize(text, width) as string[];
-    doc.text(lines, x, y, { lineHeightFactor: lineHeight });
-    return y + lines.length * fontSize * 0.3528 * lineHeight;
+  const setText = (color: readonly [number, number, number]) => doc.setTextColor(...color);
+  const setFill = (color: readonly [number, number, number]) => doc.setFillColor(...color);
+  const setDraw = (color: readonly [number, number, number]) => doc.setDrawColor(...color);
+  const linesFor = (text: string, width: number, size: number) => {
+    doc.setFontSize(size);
+    return doc.splitTextToSize(text, width) as string[];
   };
-  const drawFooter = (page: number) => {
-    setDraw(colors.line);
-    doc.setLineWidth(0.3);
-    doc.line(18, 278, 192, 278);
-    setText(colors.muted);
-    setFont('normal');
-    doc.setFontSize(8.5);
-    doc.text('Endometriose Stichting  |  endometriose.nl', 18, 285);
-    doc.text(`${page} / 2`, 192, 285, { align: 'right' });
+  const drawTextBlock = (text: string, x: number, firstBaseline: number, width: number, size: number, lineHeight = 1.4) => {
+    const lines = linesFor(text, width, size);
+    doc.text(lines, x, firstBaseline, { lineHeightFactor: lineHeight });
+    return firstBaseline + (lines.length - 1) * size * lineHeight;
   };
-  const drawBrand = async () => {
-    setFill(colors.magenta);
-    doc.rect(0, 0, 210, 5, 'F');
+  const drawLogo = async () => {
     try {
       const logo = await svgAsPng('/images/logo.svg', 354, 96);
-      doc.addImage(logo, 'PNG', 18, 15, 44.25, 12);
+      doc.addImage(logo, 'PNG', 56, 56, 177, 48);
     } catch {
       setText(colors.magenta);
       setFont('bold');
-      doc.setFontSize(14);
-      doc.text('Endometriose Stichting', 18, 23);
+      doc.setFontSize(20);
+      doc.text(['Endometriose', 'Stichting'], 56, 75, { lineHeightFactor: 1.15 });
     }
   };
+  const drawFooter = (page: number, withNextPagePrompt = false) => {
+    if (withNextPagePrompt) {
+      setText(colors.magenta);
+      setFont('normal');
+      doc.setFontSize(11);
+      doc.text('Bekijk jouw antwoorden op de volgende pagina', 521, 751, { align: 'right' });
+      doc.setLineWidth(1.2);
+      setDraw(colors.magenta);
+      doc.line(529, 747, 538, 747);
+      doc.line(534, 743, 538, 747);
+      doc.line(534, 751, 538, 747);
+    }
+    setDraw(colors.divider);
+    doc.setLineWidth(0.8);
+    doc.line(56, 762, 539, 762);
+    setText(colors.muted);
+    setFont('normal');
+    doc.setFontSize(11);
+    doc.text('Endometriose Stichting | endometriose.nl', 56, 783);
+    doc.text(`${page} / 2`, 539, 783, { align: 'right' });
+  };
 
-  doc.setProperties({ title: 'Uitslag Endometriosetest', subject: 'Persoonlijk overzicht van de Endometriosetest', author: 'Endometriose Stichting', creator: 'Endometriose Stichting' });
+  doc.setProperties({
+    title: 'Uitslag Endometriosetest',
+    subject: 'Persoonlijk overzicht van de Endometriosetest',
+    author: 'Endometriose Stichting',
+    creator: 'Endometriose Stichting',
+  });
 
-  await drawBrand();
+  await drawLogo();
   setText(colors.magenta);
   setFont('medium');
-  doc.setFontSize(10);
-  doc.text('JOUW UITSLAG', 18, 40);
+  doc.setFontSize(11);
+  doc.text('Jouw uitslag', 56, 155);
+
   setText(colors.ink);
   setFont('bold');
-  const title = shouldContactDoctor ? 'Er is kans dat je endometriose hebt.' : 'Blijf luisteren naar je lichaam.';
-  let y = writeWrapped(title, 18, 51, 174, 24, 1.15) + 3;
+  doc.setFontSize(24);
+  doc.text(shouldContactDoctor ? 'Er is kans dat je endometriose hebt.' : 'Blijf luisteren naar je lichaam.', 56, 184);
+
   setText(colors.muted);
   setFont('medium');
   doc.setFontSize(11);
-  doc.text(`Je hebt ${yesCount} van de 8 vragen met 'ja' beantwoord.`, 18, y);
-  y += 10;
+  doc.text(`Je hebt ${yesCount} van de 8 vragen met ‘ja’ beantwoord.`, 56, 205);
 
-  setFill(colors.pale);
-  doc.roundedRect(18, y, 174, shouldContactDoctor ? 54 : 68, 6, 6, 'F');
   setText(colors.ink);
   setFont('bold');
-  doc.setFontSize(12);
-  doc.text(shouldContactDoctor ? 'Bespreek je klachten met je huisarts' : 'Blijf goed naar je lichaam luisteren', 26, y + 12);
+  doc.setFontSize(18);
+  doc.text(shouldContactDoctor ? 'Bespreek je klachten met je huisarts' : 'Blijf goed naar je lichaam luisteren', 56, 266);
+
   setText(colors.muted);
   setFont('normal');
   const summary = shouldContactDoctor
     ? 'Je antwoorden geven reden om je klachten verder te bespreken. Dat betekent niet automatisch dat je endometriose hebt. Deze test kan endometriose niet aantonen of uitsluiten.'
-    : 'Deze score geeft niet automatisch het advies om contact op te nemen met je huisarts. De test kan endometriose echter niet aantonen of uitsluiten. Bespreek aanhoudende of beperkende klachten alsnog met je huisarts.';
-  writeWrapped(summary, 26, y + 22, 158, 10, 1.35);
-  y += shouldContactDoctor ? 64 : 78;
+    : 'Je antwoorden geven op dit moment geen sterke aanwijzing. Deze test kan endometriose echter niet aantonen of uitsluiten. Blijven je klachten aanhouden of beperken ze je dagelijks leven, bespreek ze dan met je huisarts.';
+  drawTextBlock(summary, 56, 287, 483, 11, 1.4);
 
+  setFill(colors.pale);
+  doc.roundedRect(56, 317, 483, 56, 24, 24, 'F');
   setDraw(colors.magenta);
-  doc.setLineWidth(0.6);
-  doc.circle(23, y + 4, 4, 'S');
+  doc.setLineWidth(1.5);
+  doc.circle(84, 345, 10, 'S');
   setText(colors.magenta);
-  setFont('bold');
-  doc.setFontSize(9);
-  doc.text('i', 23, y + 5.5, { align: 'center' });
+  setFont('medium');
+  doc.setFontSize(11);
+  doc.text('i', 84, 349, { align: 'center' });
   setText(colors.ink);
   setFont('medium');
-  writeWrapped("Bij drie of meer keer 'ja' adviseren we je contact op te nemen met je huisarts.", 32, y + 2, 154, 10, 1.3);
-  y += 24;
+  doc.setFontSize(11);
+  doc.text('Bij drie of meer keer ‘ja’ adviseren we je contact op te nemen met je huisarts.', 112, 349);
 
   setText(colors.orange);
   setFont('medium');
-  doc.setFontSize(10);
-  doc.text(shouldContactDoctor ? 'WAT NU?' : 'EEN LUISTEREND OOR', 18, y);
-  y += 9;
-  const steps = shouldContactDoctor ? [
-    ['1', 'Bewaar je uitslag', 'Download dit overzicht en neem het mee wanneer je jouw klachten bespreekt.'],
-    ['2', 'Maak een afspraak', 'Plan een afspraak bij je huisarts en vertel welke klachten je ervaart.'],
-    ['3', 'Neem je antwoorden mee', 'Je antwoorden kunnen helpen om het gesprek over passende vervolgstappen te voeren.'],
-  ] : [
-    ['1', 'Houd je klachten in de gaten', 'Blijf luisteren naar je lichaam en noteer klachten die terugkomen.'],
-    ['2', 'Vraag hulp als dat nodig is', 'Maak je je zorgen of beperken klachten je dagelijks leven? Bespreek ze dan met je huisarts.'],
-  ];
-  for (const [number, heading, copy] of steps) {
-    setFill(colors.magenta);
-    doc.circle(23, y + 4, 4.5, 'F');
-    setText(colors.white);
-    setFont('bold');
-    doc.setFontSize(9);
-    doc.text(number, 23, y + 5.4, { align: 'center' });
-    setText(colors.ink);
-    setFont('bold');
-    doc.setFontSize(11);
-    doc.text(heading, 32, y + 3.5);
-    setText(colors.muted);
-    setFont('normal');
-    writeWrapped(copy, 32, y + 10, 154, 9.5, 1.3);
-    y += 27;
-  }
-  drawFooter(1);
+  doc.setFontSize(11);
+  doc.text('Wat nu?', 56, 425);
 
-  doc.addPage();
-  await drawBrand();
-  setText(colors.magenta);
-  setFont('medium');
-  doc.setFontSize(10);
-  doc.text('ENDOMETRIOSETEST', 18, 40);
-  setText(colors.ink);
-  setFont('bold');
-  doc.setFontSize(24);
-  doc.text('Jouw antwoorden', 18, 52);
-  setText(colors.muted);
-  setFont('normal');
-  doc.setFontSize(10);
-  doc.text('Een overzicht om te bewaren of mee te nemen naar je huisarts.', 18, 61);
-
-  y = 72;
-  questions.forEach((question, index) => {
-    const answer = answers[index] ?? 'Niet beantwoord';
-    const questionLines = doc.splitTextToSize(question, 115) as string[];
-    const cardHeight = Math.max(20, 10 + questionLines.length * 4.5);
-    setFill(index % 2 === 0 ? colors.pale : colors.white);
-    if (index % 2 !== 0) setDraw(colors.line);
-    doc.roundedRect(18, y, 174, cardHeight, 4, 4, index % 2 === 0 ? 'F' : 'FD');
-    setText(colors.magenta);
-    setFont('bold');
-    doc.setFontSize(10);
-    doc.text(`${index + 1}`, 25, y + 8);
-    setText(colors.ink);
-    setFont('normal');
-    doc.setFontSize(9.5);
-    doc.text(questionLines, 34, y + 7, { lineHeightFactor: 1.25 });
-    const answerColor = answer === 'Ja' ? colors.magenta : answer === 'Weet ik niet' ? colors.orange : colors.muted;
-    setFill(answerColor);
-    doc.roundedRect(158, y + 5, 27, 9, 4.5, 4.5, 'F');
+  const steps = shouldContactDoctor
+    ? [
+        ['Bewaar je uitslag', 'Download dit overzicht en neem het mee wanneer je jouw klachten gaat bespreken met jouw huisarts.'],
+        ['Maak een afspraak', 'Plan een afspraak bij je huisarts en vertel welke klachten je ervaart.'],
+        ['Neem je antwoorden mee', 'Je antwoorden kunnen helpen om het gesprek over passende vervolgstappen te voeren.'],
+      ]
+    : [
+        ['Bewaar je uitslag', 'Download dit overzicht zodat je jouw antwoorden later nog eens kunt bekijken.'],
+        ['Blijf je klachten volgen', 'Schrijf op wanneer klachten terugkomen en wat ze met je dagelijks leven doen.'],
+        ['Vraag hulp als dat nodig is', 'Bespreek aanhoudende of beperkende klachten altijd met je huisarts.'],
+      ];
+  const stepCenters = [452, 513, 559];
+  steps.forEach(([heading, copy], index) => {
+    const centerY = stepCenters[index];
+    setFill(colors.orange);
+    doc.circle(68, centerY, 12, 'F');
     setText(colors.white);
     setFont('medium');
-    doc.setFontSize(8.5);
-    doc.text(answer, 171.5, y + 10.8, { align: 'center' });
-    y += cardHeight + 3;
+    doc.setFontSize(11);
+    doc.text(`${index + 1}`, 68, centerY + 4, { align: 'center' });
+    setText(colors.ink);
+    setFont('medium');
+    doc.setFontSize(11);
+    doc.text(heading, 92, centerY - 2);
+    setText(colors.muted);
+    setFont('normal');
+    drawTextBlock(copy, 92, centerY + 17, 447, 11, 1.4);
   });
+  drawFooter(1, true);
 
-  setText(colors.muted);
-  setFont('normal');
-  writeWrapped('Let op: deze test kan endometriose niet aantonen of uitsluiten en vervangt geen medisch onderzoek of gesprek met een zorgprofessional.', 18, 266, 174, 8.5, 1.25);
+  doc.addPage();
+  await drawLogo();
+  let y = 144;
+  questions.forEach((question, index) => {
+    const answer = answers[index] ?? 'Niet beantwoord';
+    setFont('medium');
+    const questionLines = linesFor(question, 299, 11);
+    const cardHeight = Math.max(60, 32 + questionLines.length * 15.4);
+    setFill(index % 2 === 0 ? colors.pale : colors.white);
+    setDraw(colors.border);
+    doc.setLineWidth(1);
+    doc.roundedRect(56, y, 483, cardHeight, 24, 24, index % 2 === 0 ? 'F' : 'FD');
+
+    setFill(colors.magenta);
+    doc.circle(84, y + cardHeight / 2, 12, 'F');
+    setText(colors.white);
+    setFont('medium');
+    doc.setFontSize(11);
+    doc.text(`${index + 1}`, 84, y + cardHeight / 2 + 4, { align: 'center' });
+
+    setText(colors.ink);
+    setFont('medium');
+    doc.setFontSize(11);
+    const firstQuestionBaseline = y + (cardHeight - questionLines.length * 15.4) / 2 + 11;
+    doc.text(questionLines, 108, firstQuestionBaseline, { lineHeightFactor: 1.4 });
+
+    const answerColor = answer === 'Ja' ? colors.magenta : answer === 'Weet ik niet' ? colors.orange : colors.muted;
+    setFill(answerColor);
+    doc.roundedRect(431, y + (cardHeight - 28) / 2, 92, 28, 14, 14, 'F');
+    setText(colors.white);
+    setFont('medium');
+    doc.setFontSize(11);
+    doc.text(answer, 477, y + cardHeight / 2 + 4, { align: 'center' });
+    y += cardHeight + 12;
+  });
   drawFooter(2);
+
   doc.save('uitslag-endometriosetest.pdf');
 }
