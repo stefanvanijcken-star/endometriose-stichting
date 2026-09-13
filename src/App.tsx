@@ -2,12 +2,12 @@ import { useState } from 'react';
 import { createTestResultPdf } from './testResultPdf';
 
 const symptoms = [
-  ['Heftige menstruatiepijn', 'Pijn die je dagelijkse leven, school, werk of sport belemmert.'],
-  ['Buik- of bekkenpijn', 'Terugkerende of aanhoudende pijn, ook buiten je menstruatie.'],
-  ['Darm- of blaasklachten', 'Pijn of andere klachten rondom de ontlasting en het plassen.'],
-  ['Pijn tijdens of na seks', 'Pijn tijdens of na seks is een veelvoorkomende klacht bij endometriose.'],
-  ['Extreme vermoeidheid', 'Een uitputting die niet verdwijnt na een goede nachtrust.'],
-  ['Vruchtbaarheidsproblemen', 'Moeilijk zwanger worden kan samenhangen met endometriose.'],
+  ['Buik- of bekkenpijn', '/images/symptom-pelvic.svg'],
+  ['Heftige menstruatiepijn', '/images/symptom-menstruation.svg'],
+  ['Pijn tijdens of na seks', '/images/symptom-sex.svg'],
+  ['Darm- of blaasklachten', '/images/symptom-bowel-bladder.svg'],
+  ['Vruchtbaarheidsproblemen', '/images/symptom-fertility.svg'],
+  ['Extreme vermoeidheid', '/images/symptom-fatigue.svg'],
 ];
 
 const routes = [
@@ -41,7 +41,12 @@ const testQuestions = [
   'Ik heb doorbraakbloedingen tijdens pilgebruik.',
 ];
 
-const getPageHref = (label: string) => label === 'Doe de Endometriosetest' ? '/endometriosetest' : '#';
+const getPageHref = (label: string) => {
+  if (label === 'Doe de Endometriosetest') return '/endometriosetest';
+  if (label === 'Wat is endometriose?') return '/wat-is-endometriose';
+  if (label === 'Klachten') return '/klachten';
+  return '#';
+};
 
 function Button({ children, variant = 'primary', onClick, full = false, href }: { children: React.ReactNode; variant?: 'primary' | 'orange' | 'white' | 'outline' | 'magenta-outline'; onClick?: () => void; full?: boolean; href?: string }) {
   const className = `button button--${variant}${full ? ' button--full' : ''}`;
@@ -81,7 +86,7 @@ function Hero() { return <section className="hero" id="top">
 
 function SectionHeading({ title, copy, action }: { title: string; copy: string; action?: React.ReactNode }) { return <div className="section-heading"><div><h2>{title}</h2><p>{copy}</p></div>{action}</div>; }
 
-function Symptoms() { return <section className="section symptoms" id="klachten"><SectionHeading title="Herken je dit?" copy="Endometriose uit zich bij iedereen anders. Klachten kunnen tijdens de menstruatie optreden, maar ook op andere momenten." action={<Button>Bekijk alle klachten</Button>} /><div className="symptoms-layout"><div className="symptom-grid">{symptoms.map(([title, copy]) => <article className="soft-card" key={title}><h3>{title}</h3><p>{copy}</p></article>)}</div><img className="symptoms-image" src="/images/image-4.jpg" alt="Vrouw met buikpijn" /></div><div className="mobile-section-action"><Button full>Bekijk alle klachten</Button></div></section>; }
+function Symptoms() { return <section className="section symptoms" id="klachten"><SectionHeading title="Herken je dit?" copy="Endometriose uit zich bij iedereen anders. Klachten kunnen tijdens de menstruatie optreden, maar ook op andere momenten." action={<Button>Bekijk alle klachten</Button>} /><div className="symptoms-layout"><div className="symptom-grid">{symptoms.map(([title, icon]) => <article className="symptom-card" key={title}><span className="symptom-icon"><img src={icon} alt="" /></span><h3>{title}</h3></article>)}</div><img className="symptoms-image" src="/images/symptoms-photo.png" alt="Vrouw bij een raam" /></div><div className="mobile-section-action"><Button full>Bekijk alle klachten</Button></div></section>; }
 
 function TestSection() { const [answer, setAnswer] = useState('Ja'); return <section className="section test-section"><div className="test-copy"><SectionHeading title="Zijn jouw klachten normaal?" copy="Beantwoord acht korte vragen over je klachten. De test stelt geen diagnose, maar helpt je bepalen of het verstandig is om je klachten met je huisarts te bespreken." /><ul className="facts"><li><img src="/images/test-questions.svg" alt="" />8 vragen</li><li><img src="/images/test-time.svg" alt="" />Ongeveer 2 minuten</li><li><img src="/images/test-insight.svg" alt="" />Direct inzicht in mogelijke vervolgstappen</li></ul><Button href="/endometriosetest">Start de test</Button></div><div className="question-card"><small>4/8</small><h3>Moet je door je menstruatieklachten soms thuisblijven van school, werk of sport?</h3><div className="radio-list">{['Ja', 'Nee', 'Weet ik niet'].map(option => <label key={option}><input type="radio" name="answer" checked={answer === option} onChange={() => setAnswer(option)} />{option}</label>)}</div></div></section>; }
 
@@ -269,11 +274,136 @@ function TestPage() {
 
 function Footer() { return <footer><div className="footer-main"><div className="footer-brand"><div className="footer-brand-copy"><img src="/images/footer-logo.svg" alt="Endometriose Stichting" /><p>Voor erkenning, betrouwbare kennis en betere endometriosezorg.</p></div><Button variant="white" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}><img src="/images/top-arrow.svg" alt="" />Naar boven</Button></div><div className="footer-columns">{footerColumns.map(([title,...links]) => <div key={title}><h3>{title}</h3>{links.map(link => <a href={getPageHref(link)} key={link}>{link}</a>)}</div>)}</div></div><div className="footer-bottom"><strong>© Endometriose Stichting</strong><div><a href="#">Privacy</a><a href="#">Cookies</a><a href="#">Disclaimer</a><a href="#">Toegangkelijkheid</a></div><span>ANBI/RSIN nummer: 8156.17.987</span></div></footer>; }
 
+type RelatedArticle = { title: string; copy: string; image: string; href: string };
+
+function ArticleHero({ title, copy, current, image, primary, secondary }: { title: string; copy: string; current: string; image: string; primary: React.ReactNode; secondary: React.ReactNode }) {
+  const backgroundImage = "linear-gradient(90deg,rgba(243,134,39,.08),rgba(197,42,114,.2)),linear-gradient(rgba(0,0,0,.2),rgba(0,0,0,.2)),url('" + image + "')";
+  return <section className="article-hero" style={{ backgroundImage }}>
+    <div className="article-hero-inner">
+      <div className="article-breadcrumbs" aria-label="Broodkruimelpad">
+        <a href="/" aria-label="Home"><img src="/images/breadcrumb-home.svg" alt="" /></a>
+        {['Endometriose', 'Begrijpen', current].map(item => <span key={item}><img src="/images/breadcrumb-chevron.svg" alt="" />{item}</span>)}
+      </div>
+      <div className="article-hero-copy"><h1>{title}</h1><p>{copy}</p></div>
+      <div className="article-actions">{primary}{secondary}</div>
+    </div>
+  </section>;
+}
+
+function ArticleSummary({ items }: { items: string[] }) {
+  return <section className="article-section article-summary"><div className="article-summary-inner"><img src="/images/article-summary.svg" alt="" /><div><h2>In het kort</h2><ul>{items.map(item => <li key={item}>{item}</li>)}</ul></div></div></section>;
+}
+
+function ArticleCallout({ children }: { children: React.ReactNode }) {
+  return <div className="article-callout"><span aria-hidden="true" /><p>{children}</p></div>;
+}
+
+function MedicalReview({ inverse = false }: { inverse?: boolean }) {
+  return <div className={'medical-review' + (inverse ? ' medical-review--inverse' : '')}>
+    <p><strong>Laatste inhoudelijke controle:</strong> 13-09-2026<br /><strong>Medisch gecontroleerd door:</strong> Lennie van Hanegem</p>
+    <p>Deze informatie is algemeen en vervangt geen persoonlijk medisch advies. Bespreek vragen of zorgen over je gezondheid met je huisarts of behandelend arts.</p>
+  </div>;
+}
+
+function RelatedArticles({ cards }: { cards: RelatedArticle[] }) {
+  return <section className="article-section article-related"><div className="article-wide"><h2>Lees ook</h2><div className="article-related-grid">{cards.map(card => <a className="article-related-card" href={card.href} key={card.title}><img src={card.image} alt="" /><div><div><h3>{card.title}</h3><p>{card.copy}</p></div><span className="button button--magenta-outline">Meer info</span></div></a>)}</div></div></section>;
+}
+
+const whatRelated: RelatedArticle[] = [
+  { title: 'Klachten', copy: 'Lees welke klachten bij endometriose kunnen voorkomen.', image: '/images/related-complaints.png', href: '/klachten' },
+  { title: 'Diagnose', copy: 'Lees hoe onderzoek en diagnose verlopen en wat je kunt verwachten.', image: '/images/related-diagnosis.png', href: '#' },
+  { title: 'Adenomyose', copy: 'Lees wat adenomyose is en hoe het verschilt van endometriose.', image: '/images/related-adenomyosis.png', href: '#' },
+];
+
+const complaintsRelated: RelatedArticle[] = [
+  { title: 'Wat is endometriose?', copy: 'Lees wat endometriose is en welke invloed de aandoening kan hebben.', image: '/images/related-endometriosis.png', href: '/wat-is-endometriose' },
+  { title: 'Adenomyose', copy: 'Lees wat adenomyose is en hoe het verschilt van endometriose.', image: '/images/related-adenomyosis.png', href: '#' },
+  { title: 'Diagnose', copy: 'Lees hoe onderzoek en diagnose verlopen en wat je kunt verwachten.', image: '/images/related-diagnosis.png', href: '#' },
+];
+
+function WhatIsEndometriosisPage() {
+  return <><Header /><main className="article-page" id="top">
+    <ArticleHero
+      current="Wat is endometriose?"
+      title="Wat is endometriose?"
+      copy="Endometriose is een chronische aandoening waarbij weefsel dat lijkt op het slijmvlies aan de binnenkant van de baarmoeder buiten de baarmoeder aanwezig is. Dit kan ontstekingen, littekenweefsel en verklevingen veroorzaken. Waar endometriose voorkomt en hoeveel klachten iemand ervaart, verschilt per persoon."
+      image="/images/article-endometriosis-hero.png"
+      primary={<Button href="/klachten">Bekijk de klachten</Button>}
+      secondary={<Button variant="white" href="/endometriosetest">Doe de Endometriosetest</Button>}
+    />
+    <ArticleSummary items={[
+      'Endometrioseweefsel bevindt zich buiten de baarmoeder.',
+      'Het kan ontstekingen, pijn, littekenweefsel en verklevingen veroorzaken.',
+      'Endometriose wordt meestal gevonden in de buik en het bekken.',
+      'De klachten en de invloed op het dagelijks leven verschillen per persoon.',
+      'De precieze oorzaak van endometriose is nog niet bekend.',
+    ]} />
+    <section className="article-section article-section--pale"><div className="article-flow">
+      <div className="article-copy"><h2>Wat gebeurt er in het lichaam?</h2><p>Aan de binnenkant van de baarmoeder zit het baarmoederslijmvlies. Dit slijmvlies verandert onder invloed van hormonen tijdens de menstruatiecyclus.</p><p>Bij endometriose bevindt zich buiten de baarmoeder weefsel dat op dit baarmoederslijmvlies lijkt. Ook dit weefsel is gevoelig voor hormonen en kan een chronische ontstekingsreactie veroorzaken.</p><p>Door deze ontstekingsreactie kunnen pijn, littekenweefsel en verklevingen ontstaan. Bij verklevingen komen organen of andere structuren in de buik aan elkaar vast te zitten. Dit kan pijn of andere klachten veroorzaken.</p><p>Niet iedereen met endometriose ervaart dezelfde klachten. De hoeveelheid endometriose die bij onderzoek zichtbaar is, zegt bovendien niet altijd iets over de hoeveelheid pijn die iemand heeft.</p><ArticleCallout>Endometriose is meer dan menstruatiepijn. De aandoening kan invloed hebben op verschillende delen van het lichaam en op het dagelijks leven.</ArticleCallout></div>
+      <div className="article-copy"><h2>Waar kan endometriose voorkomen?</h2><p>Endometriose wordt meestal gevonden in de buik en het bekken. Veelvoorkomende plaatsen zijn:</p><ul><li>het buikvlies;</li><li>de eierstokken;</li><li>rondom de baarmoeder en eileiders;</li><li>tussen de baarmoeder en de endeldarm;</li><li>op of rondom de darmen;</li><li>op of rondom de blaas.</li></ul><p>Op de eierstokken kunnen cysten ontstaan die gevuld zijn met oud bloed. Deze cysten worden endometriomen genoemd.</p><p>Endometriose kan soms ook op andere plaatsen in het lichaam voorkomen, bijvoorbeeld rond het middenrif of in een operatielitteken. Dit gebeurt minder vaak.</p><p>De plaats van de endometriose bepaalt niet automatisch hoeveel klachten iemand ervaart. Een kleine plek kan veel pijn veroorzaken, terwijl uitgebreidere endometriose soms weinig klachten geeft.</p></div>
+      <img className="article-diagram" src="/images/endometriosis-diagram.png" alt="Illustratie van plaatsen waar endometriose kan voorkomen" />
+      <div className="article-copy"><h2>Hoe ontstaat endometriose?</h2><p>De precieze oorzaak van endometriose is nog niet bekend. Waarschijnlijk spelen meerdere factoren samen een rol.</p><p>Onderzoekers kijken onder andere naar:</p><ul><li>erfelijke aanleg;</li><li>de werking van hormonen;</li><li>het afweersysteem;</li><li>ontstekingsreacties in het lichaam.</li></ul><p>Endometriose komt in sommige families vaker voor. Dat betekent niet dat iedereen met endometriose ook een familielid met de aandoening heeft.</p><p>Ook is niet aangetoond dat endometriose ontstaat door één bepaalde leefstijl, voedingskeuze of hoeveelheid stress.</p><ArticleCallout>Endometriose is niet jouw schuld.</ArticleCallout></div>
+      <MedicalReview />
+    </div></section>
+    <section className="article-section"><div className="article-copy article-cta"><h2>Herken je klachten bij jezelf?</h2><p>Endometriose kan verschillende klachten veroorzaken, zoals heftige menstruatiepijn, buik- of bekkenpijn, darm- en blaasklachten, pijn tijdens of na seks en extreme vermoeidheid.</p><p>Lees welke klachten kunnen voorkomen of beantwoord acht korte vragen met de Endometriosetest. De test stelt geen diagnose, maar kan helpen bepalen of het verstandig is om je klachten met de huisarts te bespreken.</p><div className="article-actions"><Button href="/klachten">Bekijk de klachten</Button><Button variant="magenta-outline" href="/endometriosetest">Doe de Endometriosetest</Button></div></div></section>
+    <RelatedArticles cards={whatRelated} />
+  </main><Footer /></>;
+}
+
+const complaintCards = [
+  ['Heftige menstruatiepijn', 'Pijn die je dagelijkse leven, school, werk, slaap of sport belemmert.', '/images/symptom-menstruation.svg'],
+  ['Buik- of bekkenpijn', 'Terugkerende of aanhoudende pijn, ook buiten je menstruatie.', '/images/symptom-pelvic.svg'],
+  ['Darm- of blaasklachten', 'Pijn of andere klachten rond ontlasting en plassen.', '/images/symptom-bowel-bladder.svg'],
+  ['Pijn tijdens of na seks', 'Pijn of een onaangenaam gevoel tijdens of na seksuele activiteit.', '/images/symptom-sex.svg'],
+  ['Extreme vermoeidheid', 'Een uitputting die niet verdwijnt na een goede nachtrust.', '/images/symptom-fatigue.svg'],
+  ['Vruchtbaarheidsproblemen', 'Moeilijk zwanger worden kan samenhangen met endometriose.', '/images/symptom-fertility.svg'],
+];
+
+function ComplaintDetail({ title, icon, children, callout }: { title: string; icon: string; children: React.ReactNode; callout?: string }) {
+  return <div className="complaint-detail"><span className="complaint-detail-icon"><img src={icon} alt="" /></span><div className="article-copy"><h2>{title}</h2>{children}{callout && <ArticleCallout>{callout}</ArticleCallout>}</div></div>;
+}
+
+function ComplaintsPage() {
+  return <><Header /><main className="article-page" id="top">
+    <ArticleHero
+      current="Klachten"
+      title="Klachten van endometriose"
+      copy="Endometriose kan verschillende klachten veroorzaken. Welke klachten je hebt en hoeveel last je daarvan ervaart, verschilt per persoon. Sommige klachten ontstaan vooral rond de menstruatie, andere kunnen op ieder moment aanwezig zijn."
+      image="/images/article-complaints-hero.png"
+      primary={<Button href="/endometriosetest">Doe de Endometriosetest</Button>}
+      secondary={<Button variant="white">Bereid je huisartsbezoek voor</Button>}
+    />
+    <ArticleSummary items={[
+      'Endometriose uit zich bij iedereen anders.',
+      'De hoeveelheid pijn zegt niet altijd iets over de ernst van de aandoening.',
+      'Klachten kunnen ook buiten de menstruatie voorkomen.',
+      'Alleen een arts kan beoordelen waardoor je klachten ontstaan.',
+    ]} />
+    <section className="article-section article-section--pale"><div className="article-wide article-complaint-intro"><div><h2>Herken je dit?</h2><p>Deze klachten komen regelmatig voor bij endometriose. Eén klacht zegt niet alles: klachten kunnen ook een andere oorzaak hebben.</p></div><div className="article-complaint-grid">{complaintCards.map(([title, copy, icon]) => <article key={title}><span className="symptom-icon"><img src={icon} alt="" /></span><div><h3>{title}</h3><p>{copy}</p></div></article>)}</div></div></section>
+    <section className="article-section"><div className="article-copy"><h2>Klachten verschillen per persoon</h2><p>Niet iedereen met endometriose ervaart dezelfde klachten. De ene persoon heeft vooral pijn tijdens de menstruatie, terwijl een ander dagelijks buik- of bekkenpijn heeft. Ook de intensiteit kan wisselen.</p><p>De hoeveelheid pijn komt niet altijd overeen met de hoeveelheid of uitgebreidheid van de endometriose. Iemand met weinig zichtbare endometriose kan veel pijn ervaren, terwijl iemand anders met uitgebreidere endometriose relatief weinig klachten heeft.</p><ArticleCallout>Jouw ervaring telt. Pijn of andere klachten die je dagelijks leven beperken, verdienen aandacht.</ArticleCallout></div></section>
+    <section className="article-section article-section--pale"><div className="article-flow">
+      <ComplaintDetail title="Heftige menstruatiepijn" icon="/images/symptom-menstruation.svg"><p>Buikkrampen tijdens de menstruatie komen vaak voor. Maar pijn waardoor je niet naar school of werk kunt, niet kunt slapen of nauwelijks normaal kunt functioneren, is een reden om hulp te zoeken.</p><p>De pijn kan vóór de menstruatie beginnen en tijdens of na de menstruatie doorgaan. Sommige mensen hebben daarnaast last van lage rugpijn, pijn in de benen, misselijkheid of hevig bloedverlies.</p><p><strong>Let bijvoorbeeld op:</strong></p><ul><li>je moet regelmatig thuisblijven vanwege de pijn;</li><li>gewone pijnstillers helpen onvoldoende;</li><li>de pijn wordt sterker of houdt langer aan;</li><li>je kunt dagelijkse activiteiten niet normaal uitvoeren.</li></ul></ComplaintDetail>
+      <ComplaintDetail title="Buik- of bekkenpijn" icon="/images/symptom-pelvic.svg"><p>Endometriose kan terugkerende of langdurige pijn in de onderbuik of het bekken veroorzaken. Deze pijn hoeft niet uitsluitend tijdens de menstruatie aanwezig te zijn.</p><p>De pijn kan stekend, zeurend, krampend of drukkend aanvoelen. Soms straalt de pijn uit naar de onderrug of benen. Langdurige pijn kan ook invloed hebben op slaap, concentratie, beweging en mentale gezondheid.</p></ComplaintDetail>
+      <ComplaintDetail title="Darm- en blaasklachten" icon="/images/symptom-bowel-bladder.svg"><p>Darm- en blaasklachten kunnen rond de menstruatie sterker worden, maar ook op andere momenten voorkomen.</p><p><strong>Mogelijke darmklachten zijn:</strong></p><ul><li>buikkrampen;</li><li>pijn bij de ontlasting;</li><li>diarree of verstopping;</li><li>een opgeblazen gevoel;</li><li>het gevoel dat je naar het toilet moet terwijl er niets komt.</li></ul><p><strong>Mogelijke blaasklachten zijn:</strong></p><ul><li>pijn of een branderig gevoel bij het plassen;</li><li>vaker moeten plassen;</li><li>plotselinge of loze aandrang;</li><li>pijn rond een volle blaas.</li></ul><p>Darm- en blaasklachten kunnen verschillende oorzaken hebben. Bespreek terugkerende, ernstige of onverklaarde klachten daarom met je huisarts.</p></ComplaintDetail>
+      <ComplaintDetail title="Pijn tijdens of na seks" icon="/images/symptom-sex.svg" callout="Seks hoort niet iets te zijn waar je doorheen moet vanwege de pijn."><p>Endometriose kan pijn veroorzaken tijdens of na seksuele activiteit. De pijn kan oppervlakkig zijn, maar ook dieper in de buik of het bekken worden gevoeld.</p><p>Pijn kan ervoor zorgen dat je onbewust je bekkenbodemspieren aanspant of seksuele activiteit gaat vermijden. Het is begrijpelijk als je dit lastig vindt om te bespreken, maar je hoeft je er niet voor te schamen. Je kunt deze klacht met je huisarts of behandelaar bespreken.</p></ComplaintDetail>
+      <ComplaintDetail title="Extreme vermoeidheid" icon="/images/symptom-fatigue.svg"><p>Vermoeidheid bij endometriose kan anders voelen dan gewone moeheid. Je kunt je uitgeput voelen na een kleine inspanning of onvoldoende herstellen na slaap en rust.</p><p>Vermoeidheid is niet specifiek voor endometriose en kan veel verschillende oorzaken hebben. Bespreek aanhoudende of ernstige vermoeidheid daarom met je huisarts.</p></ComplaintDetail>
+      <ComplaintDetail title="Vruchtbaarheid en kinderwens" icon="/images/symptom-fertility.svg"><p>Endometriose kan invloed hebben op de vruchtbaarheid, maar dit betekent niet dat iedereen met endometriose moeilijk zwanger wordt.</p><p>Heb je een kinderwens of lukt het niet om zwanger te worden? Bespreek dit dan met je huisarts of behandelend arts. Samen kunnen jullie bekijken of verder onderzoek nodig is.</p></ComplaintDetail>
+    </div></section>
+    <section className="article-section article-other-complaints"><div className="article-flow"><div className="article-copy"><h2>Andere mogelijke klachten</h2><p>Naast de meest voorkomende klachten kunnen mensen onder andere last hebben van:</p><ul><li>lage rugpijn;</li><li>pijn in de benen;</li><li>pijn rond de eisprong;</li><li>een gezwollen of opgeblazen buik;</li><li>slecht slapen;</li><li>problemen met concentreren;</li><li>somberheid of prikkelbaarheid;</li><li>pijn tijdens een inwendig onderzoek.</li></ul><p>Deze klachten kunnen ook een andere oorzaak hebben. Ze betekenen op zichzelf niet dat je endometriose hebt.</p></div><MedicalReview inverse /></div></section>
+    <section className="article-section"><div className="article-copy article-cta"><h2>Klachten kunnen veranderen</h2><p>Klachten kunnen in de loop van de tijd veranderen. Ze kunnen sterker of vaker worden, maar ook tijdelijk verminderen. Sommige mensen hebben eerst alleen pijn tijdens de menstruatie en krijgen later ook klachten op andere momenten.</p><p>Het kan helpen om gedurende enkele weken of menstruatiecycli bij te houden:</p><ul><li>welke klachten je hebt;</li><li>wanneer ze optreden;</li><li>hoe hevig ze zijn;</li><li>hoelang ze duren;</li><li>wat de invloed is op je dagelijks leven;</li><li>welke medicijnen je gebruikt en of die helpen.</li></ul><Button><img src="/images/download-white.svg" alt="" />Download het klachtendagboek</Button></div></section>
+    <section className="article-section article-section--pale"><div className="article-copy article-cta"><h2>Wanneer ga je naar de huisarts?</h2><p>Maak een afspraak wanneer klachten terugkeren, erger worden of je dagelijks leven beïnvloeden. Denk bijvoorbeeld aan pijn waardoor je niet naar school, werk of sport kunt, pijnstillers die onvoldoende helpen of buikpijn die ook buiten de menstruatie blijft bestaan.</p><p>Je hoeft niet eerst zeker te weten dat het endometriose is. De huisarts kan met je bespreken waardoor de klachten mogelijk ontstaan en welke vervolgstappen passend zijn.</p><Button>Bereid je huisartsbezoek voor<img src="/images/arrow-white.svg" alt="" /></Button></div></section>
+    <section className="article-section"><div className="article-copy article-cta"><h2>Wat kun je nu doen?</h2><p>Herken je meerdere klachten of hebben ze invloed op je dagelijks leven? Doe de test of bereid een gesprek met je huisarts voor.</p><div className="article-actions"><Button href="/endometriosetest">Doe de Endometriosetest</Button><Button variant="magenta-outline">Stel je vraag aan een ervaringsdeskundige</Button></div></div></section>
+    <RelatedArticles cards={complaintsRelated} />
+  </main><Footer /></>;
+}
+
 function HomePage() { return <><Header /><main><Hero /><Symptoms /><TestSection /><Routes /><Experts /><Stories /><Agenda /><About /><Donation /></main><Footer /></>; }
 
 export default function App() {
   const pathname = window.location.pathname.replace(/\/+$/, '') || '/';
   if (pathname === '/doneren' || pathname === '/donatie') return <DonationPage />;
   if (pathname === '/endometriosetest' || pathname === '/test') return <TestPage />;
+  if (pathname === '/wat-is-endometriose') return <WhatIsEndometriosisPage />;
+  if (pathname === '/klachten') return <ComplaintsPage />;
   return <HomePage />;
 }
