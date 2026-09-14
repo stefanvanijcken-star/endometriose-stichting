@@ -80,17 +80,17 @@ function Header() {
 }
 
 function Hero() { return <section className="hero" id="top">
-  <div className="hero-main"><div className="hero-copy"><h1>Je klachten verdienen aandacht.</h1><p>Endometriose kan grote invloed hebben op je dagelijks leven. Herken de klachten, krijg betrouwbare informatie en ontdek welke stap je nu kunt nemen.</p></div><div className="button-row"><Button href="/endometriosetest">Doe de endometriosetest</Button><Button variant="white">Wat is endometriose?</Button></div></div>
+  <div className="hero-main"><div className="hero-copy"><h1>Je klachten verdienen aandacht.</h1><p>Endometriose kan grote invloed hebben op je dagelijks leven. Herken de klachten, krijg betrouwbare informatie en ontdek welke stap je nu kunt nemen.</p></div><div className="button-row"><Button href="/endometriosetest">Doe de endometriosetest</Button><Button variant="white" href="/wat-is-endometriose">Wat is endometriose?</Button></div></div>
   <div className="hero-meta"><div className="diagnosis"><strong>Heb je al een diagnose?</strong><span>Vind <u>hier</u> informatie en ondersteuning die bij jou past.</span></div><div><strong>1 op de 10</strong><span>vrouwen heeft endometriose</span></div></div>
   </section>; }
 
 function SectionHeading({ title, copy, action }: { title: string; copy: string; action?: React.ReactNode }) { return <div className="section-heading"><div><h2>{title}</h2><p>{copy}</p></div>{action}</div>; }
 
-function Symptoms() { return <section className="section symptoms" id="klachten"><SectionHeading title="Herken je dit?" copy="Endometriose uit zich bij iedereen anders. Klachten kunnen tijdens de menstruatie optreden, maar ook op andere momenten." action={<Button>Bekijk alle klachten</Button>} /><div className="symptoms-layout"><div className="symptom-grid">{symptoms.map(([title, icon]) => <article className="symptom-card" key={title}><span className="symptom-icon"><img src={icon} alt="" /></span><h3>{title}</h3></article>)}</div><img className="symptoms-image" src="/images/symptoms-photo.png" alt="Vrouw bij een raam" /></div><div className="mobile-section-action"><Button full>Bekijk alle klachten</Button></div></section>; }
+function Symptoms() { return <section className="section symptoms" id="klachten"><SectionHeading title="Herken je dit?" copy="Endometriose uit zich bij iedereen anders. Klachten kunnen tijdens de menstruatie optreden, maar ook op andere momenten." action={<Button href="/klachten">Bekijk alle klachten</Button>} /><div className="symptoms-layout"><div className="symptom-grid">{symptoms.map(([title, icon]) => <article className="symptom-card" key={title}><span className="symptom-icon"><img src={icon} alt="" /></span><h3>{title}</h3></article>)}</div><img className="symptoms-image" src="/images/symptoms-photo.png" alt="Vrouw bij een raam" /></div><div className="mobile-section-action"><Button full href="/klachten">Bekijk alle klachten</Button></div></section>; }
 
 function TestSection() { const [answer, setAnswer] = useState('Ja'); return <section className="section test-section"><div className="test-copy"><SectionHeading title="Zijn jouw klachten normaal?" copy="Beantwoord acht korte vragen over je klachten. De test stelt geen diagnose, maar helpt je bepalen of het verstandig is om je klachten met je huisarts te bespreken." /><ul className="facts"><li><img src="/images/test-questions.svg" alt="" />8 vragen</li><li><img src="/images/test-time.svg" alt="" />Ongeveer 2 minuten</li><li><img src="/images/test-insight.svg" alt="" />Direct inzicht in mogelijke vervolgstappen</li></ul><Button href="/endometriosetest">Start de test</Button></div><div className="question-card"><small>4/8</small><h3>Moet je door je menstruatieklachten soms thuisblijven van school, werk of sport?</h3><div className="radio-list">{['Ja', 'Nee', 'Weet ik niet'].map(option => <label key={option}><input type="radio" name="answer" checked={answer === option} onChange={() => setAnswer(option)} />{option}</label>)}</div></div></section>; }
 
-function Routes() { return <section className="section routes"><SectionHeading title="Waar sta jij?" copy="Iedere situatie is anders. Kies wat het beste bij jou past, dan helpen we je gericht verder." /><div className="route-grid">{routes.map(([title, copy, action]) => <article className="soft-card route-card" key={title}><div><h3>{title}</h3><p>{copy}</p></div><Button variant="outline">{action}</Button></article>)}</div></section>; }
+function Routes() { return <section className="section routes"><SectionHeading title="Waar sta jij?" copy="Iedere situatie is anders. Kies wat het beste bij jou past, dan helpen we je gericht verder." /><div className="route-grid">{routes.map(([title, copy, action]) => <article className="soft-card route-card" key={title}><div><h3>{title}</h3><p>{copy}</p></div><Button variant="outline" href={title === 'Ik heb klachten' ? '/klachten' : undefined}>{action}</Button></article>)}</div></section>; }
 
 function Experts() { return <section className="section split pale experts"><div className="split-copy"><SectionHeading title="Je hoeft het niet alleen uit te zoeken." copy="Onze ervaringsdeskundige vrijwilligers weten hoe ingrijpend endometriose kan zijn. Ze luisteren, denken mee en wijzen je de weg naar betrouwbare informatie." /><blockquote>“Soms helpt het al als iemand begrijpt waar je doorheen gaat.”</blockquote><Button>Stel je vraag</Button><small>Meestal ontvang je binnen vijf werkdagen antwoord.</small></div><img src="/images/image-5.jpg" alt="Ervaringsdeskundige" /></section>; }
 
@@ -316,7 +316,7 @@ const whatRelated: RelatedArticle[] = [
 ];
 
 const complaintsRelated: RelatedArticle[] = [
-  { title: 'Wat is endometriose?', copy: 'Lees wat endometriose is en welke invloed de aandoening kan hebben.', image: '/images/related-endometriosis.png', href: '/wat-is-endometriose' },
+  { title: 'Wat is endometriose?', copy: 'Lees wat endometriose is en welke invloed de aandoening kan hebben.', image: '/images/article-endometriosis-hero.jpg', href: '/wat-is-endometriose' },
   { title: 'Adenomyose', copy: 'Lees wat adenomyose is en hoe het verschilt van endometriose.', image: '/images/related-adenomyosis.png', href: '#' },
   { title: 'Diagnose', copy: 'Lees hoe onderzoek en diagnose verlopen en wat je kunt verwachten.', image: '/images/related-diagnosis.png', href: '#' },
 ];
@@ -327,7 +327,7 @@ function WhatIsEndometriosisPage() {
       current="Wat is endometriose?"
       title="Wat is endometriose?"
       copy="Endometriose is een chronische aandoening waarbij weefsel dat lijkt op het slijmvlies aan de binnenkant van de baarmoeder buiten de baarmoeder aanwezig is. Dit kan ontstekingen, littekenweefsel en verklevingen veroorzaken. Waar endometriose voorkomt en hoeveel klachten iemand ervaart, verschilt per persoon."
-      image="/images/article-endometriosis-hero.png"
+      image="/images/article-endometriosis-hero.jpg"
       primary={<Button href="/klachten">Bekijk de klachten</Button>}
       secondary={<Button variant="white" href="/endometriosetest">Doe de Endometriosetest</Button>}
     />
