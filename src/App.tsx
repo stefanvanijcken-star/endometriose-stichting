@@ -45,6 +45,7 @@ const getPageHref = (label: string) => {
   if (label === 'Doe de Endometriosetest') return '/endometriosetest';
   if (label === 'Wat is endometriose?') return '/wat-is-endometriose';
   if (label === 'Klachten') return '/klachten';
+  if (label === 'Bereid je huisartsbezoek voor') return '/bereid-je-huisartsbezoek-voor';
   return '#';
 };
 
@@ -199,7 +200,7 @@ function TestResults({ yesCount, onBack, onDownload }: { yesCount: number; onBac
         </div>
         <div className="test-result-callout"><img src="/images/test-result-info.svg" alt="" /><p>Bij drie of meer keer ‘ja’ adviseren we je contact op te nemen met je huisarts.</p></div>
         <div className="test-result-actions">
-          {shouldContactDoctor ? <><Button>Bereid mijn huisartsbezoek voor</Button><Button variant="magenta-outline" href="/#klachten">Bekijk alle klachten</Button></> : <><Button href="/#klachten">Bekijk alle klachten</Button><Button variant="magenta-outline">Bereid een huisartsbezoek voor</Button></>}
+          {shouldContactDoctor ? <><Button href="/bereid-je-huisartsbezoek-voor">Bereid mijn huisartsbezoek voor</Button><Button variant="magenta-outline" href="/klachten">Bekijk alle klachten</Button></> : <><Button href="/klachten">Bekijk alle klachten</Button><Button variant="magenta-outline" href="/bereid-je-huisartsbezoek-voor">Bereid een huisartsbezoek voor</Button></>}
         </div>
       </section>
     </div>
@@ -209,7 +210,7 @@ function TestResults({ yesCount, onBack, onDownload }: { yesCount: number; onBac
       <div className="test-step-list">
         <div className="test-step"><div><h2 id="next-steps-title">Stap 1: Download de uitslag</h2><p>Klik op ‘Download mijn uitslag’ om jouw informatie te bewaren en terug te kijken. Je kan de uitslag ook meenemen naar de huisarts. Dit kan helpen om jouw klachten te bespreken. Het helpt de huisarts ook om te bepalen of je misschien endometriose hebt.</p></div><Button variant="outline" onClick={onDownload}>Download mijn uitslag</Button></div>
         <div className="test-step"><div><h2>Stap 2: Maak een afspraak bij de huisarts</h2><p>Er is kans dat je endometriose hebt. Maak daarom een afspraak bij de huisarts. De huisarts zal je klachten met je bespreken en kan, met jouw toestemming, onderzoek doen.</p></div></div>
-        <div className="test-step"><div><h2>Stap 3: Neem de uitslag mee naar de huisarts</h2><p>Neem de uitslag mee naar de huisarts. Dit helpt de huisarts om te beoordelen of je misschien endometriose hebt. Als de huisarts denkt dat je endometriose hebt, kan er een behandeling worden gestart. Klik op ‘Bereid mijn huisartsbezoek voor’ voor meer informatie over de afspraak bij de huisarts.</p></div><Button variant="outline">Bereid mijn huisartsbezoek voor</Button></div>
+        <div className="test-step"><div><h2>Stap 3: Neem de uitslag mee naar de huisarts</h2><p>Neem de uitslag mee naar de huisarts. Dit helpt de huisarts om te beoordelen of je misschien endometriose hebt. Als de huisarts denkt dat je endometriose hebt, kan er een behandeling worden gestart. Klik op ‘Bereid mijn huisartsbezoek voor’ voor meer informatie over de afspraak bij de huisarts.</p></div><Button variant="outline" href="/bereid-je-huisartsbezoek-voor">Bereid mijn huisartsbezoek voor</Button></div>
       </div>
     </section>}
 
@@ -276,15 +277,15 @@ function Footer() { return <footer><div className="footer-main"><div className="
 
 type RelatedArticle = { title: string; copy: string; image: string; href: string };
 
-function ArticleHero({ title, copy, current, image, primary, secondary }: { title: string; copy: string; current: string; image: string; primary: React.ReactNode; secondary: React.ReactNode }) {
+function ArticleHero({ title, copy, current, image, primary, secondary, breadcrumbs = ['Endometriose', 'Begrijpen'] }: { title: string; copy: React.ReactNode; current: string; image: string; primary: React.ReactNode; secondary: React.ReactNode; breadcrumbs?: string[] }) {
   const backgroundImage = "linear-gradient(90deg,rgba(243,134,39,.08),rgba(197,42,114,.2)),linear-gradient(rgba(0,0,0,.2),rgba(0,0,0,.2)),url('" + image + "')";
   return <section className="article-hero" style={{ backgroundImage }}>
     <div className="article-hero-inner">
       <div className="article-breadcrumbs" aria-label="Broodkruimelpad">
         <a href="/" aria-label="Home"><img src="/images/breadcrumb-home.svg" alt="" /></a>
-        {['Endometriose', 'Begrijpen', current].map(item => <span key={item}><img src="/images/breadcrumb-chevron.svg" alt="" />{item}</span>)}
+        {[...breadcrumbs, current].map(item => <span key={item}><img src="/images/breadcrumb-chevron.svg" alt="" />{item}</span>)}
       </div>
-      <div className="article-hero-copy"><h1>{title}</h1><p>{copy}</p></div>
+      <div className="article-hero-copy"><h1>{title}</h1><div className="article-hero-description">{typeof copy === 'string' ? <p>{copy}</p> : copy}</div></div>
       <div className="article-actions">{primary}{secondary}</div>
     </div>
   </section>;
@@ -371,7 +372,7 @@ function ComplaintsPage() {
       copy="Endometriose kan verschillende klachten veroorzaken. Welke klachten je hebt en hoeveel last je daarvan ervaart, verschilt per persoon. Sommige klachten ontstaan vooral rond de menstruatie, andere kunnen op ieder moment aanwezig zijn."
       image="/images/article-complaints-hero.png"
       primary={<Button href="/endometriosetest">Doe de Endometriosetest</Button>}
-      secondary={<Button variant="white">Bereid je huisartsbezoek voor</Button>}
+      secondary={<Button variant="white" href="/bereid-je-huisartsbezoek-voor">Bereid je huisartsbezoek voor</Button>}
     />
     <ArticleSummary items={[
       'Endometriose uit zich bij iedereen anders.',
@@ -391,9 +392,54 @@ function ComplaintsPage() {
     </div></section>
     <section className="article-section article-other-complaints"><div className="article-flow"><div className="article-copy"><h2>Andere mogelijke klachten</h2><p>Naast de meest voorkomende klachten kunnen mensen onder andere last hebben van:</p><ul><li>lage rugpijn;</li><li>pijn in de benen;</li><li>pijn rond de eisprong;</li><li>een gezwollen of opgeblazen buik;</li><li>slecht slapen;</li><li>problemen met concentreren;</li><li>somberheid of prikkelbaarheid;</li><li>pijn tijdens een inwendig onderzoek.</li></ul><p>Deze klachten kunnen ook een andere oorzaak hebben. Ze betekenen op zichzelf niet dat je endometriose hebt.</p></div><MedicalReview inverse /></div></section>
     <section className="article-section"><div className="article-copy article-cta"><h2>Klachten kunnen veranderen</h2><p>Klachten kunnen in de loop van de tijd veranderen. Ze kunnen sterker of vaker worden, maar ook tijdelijk verminderen. Sommige mensen hebben eerst alleen pijn tijdens de menstruatie en krijgen later ook klachten op andere momenten.</p><p>Het kan helpen om gedurende enkele weken of menstruatiecycli bij te houden:</p><ul><li>welke klachten je hebt;</li><li>wanneer ze optreden;</li><li>hoe hevig ze zijn;</li><li>hoelang ze duren;</li><li>wat de invloed is op je dagelijks leven;</li><li>welke medicijnen je gebruikt en of die helpen.</li></ul><Button><img src="/images/download-white.svg" alt="" />Download het klachtendagboek</Button></div></section>
-    <section className="article-section article-section--pale"><div className="article-copy article-cta"><h2>Wanneer ga je naar de huisarts?</h2><p>Maak een afspraak wanneer klachten terugkeren, erger worden of je dagelijks leven beïnvloeden. Denk bijvoorbeeld aan pijn waardoor je niet naar school, werk of sport kunt, pijnstillers die onvoldoende helpen of buikpijn die ook buiten de menstruatie blijft bestaan.</p><p>Je hoeft niet eerst zeker te weten dat het endometriose is. De huisarts kan met je bespreken waardoor de klachten mogelijk ontstaan en welke vervolgstappen passend zijn.</p><Button>Bereid je huisartsbezoek voor<img src="/images/arrow-white.svg" alt="" /></Button></div></section>
+    <section className="article-section article-section--pale"><div className="article-copy article-cta"><h2>Wanneer ga je naar de huisarts?</h2><p>Maak een afspraak wanneer klachten terugkeren, erger worden of je dagelijks leven beïnvloeden. Denk bijvoorbeeld aan pijn waardoor je niet naar school, werk of sport kunt, pijnstillers die onvoldoende helpen of buikpijn die ook buiten de menstruatie blijft bestaan.</p><p>Je hoeft niet eerst zeker te weten dat het endometriose is. De huisarts kan met je bespreken waardoor de klachten mogelijk ontstaan en welke vervolgstappen passend zijn.</p><Button href="/bereid-je-huisartsbezoek-voor">Bereid je huisartsbezoek voor<img src="/images/arrow-white.svg" alt="" /></Button></div></section>
     <section className="article-section"><div className="article-copy article-cta"><h2>Wat kun je nu doen?</h2><p>Herken je meerdere klachten of hebben ze invloed op je dagelijks leven? Doe de test of bereid een gesprek met je huisarts voor.</p><div className="article-actions"><Button href="/endometriosetest">Doe de Endometriosetest</Button><Button variant="magenta-outline">Stel je vraag aan een ervaringsdeskundige</Button></div></div></section>
     <RelatedArticles cards={complaintsRelated} />
+  </main><Footer /></>;
+}
+
+const doctorVisitRelated: RelatedArticle[] = [
+  { title: 'Klachten', copy: 'Lees welke klachten bij endometriose kunnen voorkomen.', image: '/images/related-complaints.png', href: '/klachten' },
+  { title: 'Adenomyose', copy: 'Lees wat adenomyose is en hoe het verschilt van endometriose.', image: '/images/related-adenomyosis.png', href: '#' },
+  { title: 'Wat is endometriose?', copy: 'Lees wat endometriose is en welke invloed de aandoening kan hebben.', image: '/images/article-endometriosis-hero.jpg', href: '/wat-is-endometriose' },
+];
+
+function DoctorStep({ number, title, children }: { number: 1 | 2 | 3; title: string; children: React.ReactNode }) {
+  return <article className="doctor-step"><img src={`/images/doctor-step-${number}.svg`} alt={`Stap ${number}`} /><div><h3>{title}</h3>{children}</div></article>;
+}
+
+function DoctorVisitPage() {
+  return <><Header /><main className="article-page doctor-page" id="top">
+    <ArticleHero
+      current="Bereid je huisartsbezoek voor"
+      breadcrumbs={['Hulp & Zorg', 'Klachten en diagnose']}
+      title="Ga voorbereid naar je huisarts"
+      copy={<><p>Heb je klachten die mogelijk bij endometriose passen? Een goede voorbereiding helpt je om duidelijk te vertellen wat je ervaart en welke invloed dit op je dagelijks leven heeft.</p><p>Op deze pagina lees je wat je vooraf kunt bijhouden, wat je kunt meenemen en welke vragen je aan de huisarts kunt stellen.</p></>}
+      image="/images/doctor-visit-hero.png"
+      primary={<Button href="#vragenlijst">Download de gesprekshulp</Button>}
+      secondary={<Button variant="white" href="#voorbereiden">Zo bereid je je voor</Button>}
+    />
+    <section className="article-section doctor-summary"><div className="doctor-summary-inner">
+      <div className="article-summary-inner"><img src="/images/article-summary.svg" alt="" /><div><h2>In het kort</h2><ul><li>Houd bij wanneer je klachten optreden.</li><li>Beschrijf wat de klachten met je dagelijks leven doen.</li><li>Noteer welke medicijnen of oplossingen je hebt geprobeerd.</li><li>Bedenk wat je tijdens de afspraak wilt vragen.</li><li>Neem je aantekeningen mee op papier of op je telefoon.</li></ul></div></div>
+      <ArticleCallout>Wacht niet met het maken van een afspraak totdat je alles hebt bijgehouden. Ook zonder volledig overzicht kun je naar je huisarts.</ArticleCallout>
+    </div></section>
+    <section className="article-section article-section--pale" id="voorbereiden"><div className="doctor-steps article-wide">
+      <div className="doctor-section-heading"><h2>Bereid je gesprek in 3 stappen voor</h2><p>Je hoeft geen uitgebreid medisch verslag te maken. Korte en concrete aantekeningen kunnen de huisarts al helpen om je klachten beter te begrijpen.</p></div>
+      <div className="doctor-step-list">
+        <DoctorStep number={1} title="Houd je klachten bij"><p>Schrijf gedurende een aantal dagen of weken op wanneer je klachten optreden. Noteer ook of je op dat moment ongesteld bent.</p><p>Schrijf per moment kort op:</p><ul><li>welke klacht je hebt;</li><li>waar je de klacht voelt;</li><li>hoe ernstig de klacht is op een schaal van 0 tot 10;</li><li>hoe lang de klacht duurt;</li><li>wat je hierdoor niet of moeilijk kunt doen.</li></ul></DoctorStep>
+        <DoctorStep number={2} title="Noteer wat de klachten met je leven doen"><p>Vertel niet alleen hoeveel pijn je hebt. Het is ook belangrijk om te beschrijven welke invloed de klachten op je dagelijks leven hebben.</p><p>Denk bijvoorbeeld aan:</p><ul><li>school, studie of werk missen;</li><li>activiteiten moeten afzeggen;</li><li>slecht slapen;</li><li>moeite hebben met bewegen;</li><li>pijn bij het plassen of de ontlasting;</li><li>pijn tijdens of na seks;</li><li>vermoeidheid of concentratieproblemen.</li></ul></DoctorStep>
+        <DoctorStep number={3} title="Schrijf op wat je al hebt geprobeerd"><p>Noteer welke medicijnen, anticonceptie of andere oplossingen je gebruikt of hebt geprobeerd.</p><p>Schrijf daarbij op:</p><ul><li>wat je hebt gebruikt;</li><li>of het voldoende hielp;</li><li>of je bijwerkingen kreeg;</li><li>waarom je eventueel bent gestopt.</li></ul><p>Denk bijvoorbeeld aan pijnstillers, hormonale anticonceptie, warmte, rust of fysiotherapie. Verander het gebruik van medicijnen niet zonder overleg met je huisarts of apotheker.</p></DoctorStep>
+      </div>
+    </div></section>
+    <section className="article-section doctor-download" id="vragenlijst"><div className="article-copy article-cta"><h2>Vul de vragenlijst vooraf in</h2><p>De Endometriose Stichting heeft een uitgebreide vragenlijst gemaakt om je te helpen bij de voorbereiding op je afspraak. De vragen gaan onder andere over je menstruatie, pijn, darm- en blaasklachten, medicijnen en de invloed van je klachten op je leven.</p><p>Vul in wat voor jou relevant is. Je hoeft niet op iedere vraag direct een antwoord te weten. Neem de ingevulde vragenlijst mee op papier of op je telefoon.</p><Button variant="white">Download de vragenlijst</Button></div></section>
+    <section className="article-section doctor-guidance"><div className="article-flow">
+      <div className="article-copy"><h2>Neem iemand mee die je vertrouwt</h2><p>Een afspraak kan spannend of overweldigend zijn. Je mag daarom iemand meenemen, bijvoorbeeld je partner, een familielid, vriend of vriendin.</p><p>Die persoon kan:</p><ul><li>je helpen om je verhaal te vertellen;</li><li>meeluisteren en aantekeningen maken;</li><li>vragen stellen die je zelf vergeet;</li><li>je ondersteunen als je gespannen raakt;</li><li>na afloop samen met jou de afspraken doornemen.</li></ul><p>Bespreek vooraf wat je graag zelf wilt vertellen en waarbij de ander je kan helpen.</p><ArticleCallout>Vraag degene die met je meegaat om de gemaakte afspraken op te schrijven. Zo hoef jij tijdens het gesprek niet alles tegelijk te onthouden.</ArticleCallout></div>
+      <div className="article-copy"><h2>Vertel wat de klachten met je leven doen</h2><p>Je hoeft geen medische termen te gebruiken en je hoeft zelf geen diagnose te stellen. Vertel zo concreet mogelijk wat je ervaart, hoe vaak dit gebeurt en wat je door de klachten niet of moeilijk kunt doen.</p><p>Vertel ook wanneer je klachten niet alleen tijdens je menstruatie optreden. Benoem wat je al hebt geprobeerd en of dat voldoende heeft geholpen.</p></div>
+      <div className="article-copy"><h2>Stel alle vragen die je hebt</h2><p>Jouw vragen zijn een belangrijk onderdeel van de afspraak. Schrijf ze vooraf op en neem de lijst mee. Er zijn geen verkeerde of onbelangrijke vragen.</p><p>Je kunt bijvoorbeeld vragen:</p><ul><li>Kunnen mijn klachten bij endometriose passen?</li><li>Welke andere oorzaken kunnen mijn klachten hebben?</li><li>Is onderzoek nodig?</li><li>Welke behandelingen of pijnbestrijding kunnen we proberen?</li><li>Wat zijn de mogelijke voordelen en nadelen daarvan?</li><li>Wanneer kan ik verbetering verwachten?</li><li>Wat doen we als deze aanpak onvoldoende helpt?</li><li>Wanneer is een verwijzing naar een gynaecoloog passend?</li><li>Bij welke veranderingen moet ik opnieuw contact opnemen?</li><li>Wanneer bespreken we hoe het gaat?</li></ul><p>Heb je veel vragen? Vertel dit aan het begin van de afspraak. Als niet alles besproken kan worden, vraag dan om een vervolgafspraak voor de vragen die nog openstaan.</p><ArticleCallout>Je mag altijd om uitleg vragen. Bijvoorbeeld: “Kunt u dat in eenvoudigere woorden uitleggen?” of “Waarom adviseert u deze stap?”</ArticleCallout></div>
+      <div className="article-copy"><h2>Zorg dat je weet wat de volgende stap is</h2><p>Aan het einde van de afspraak hoort duidelijk te zijn wat jullie hebben besproken en hoe het verdergaat. Neem samen de gemaakte afspraken door en schrijf ze op.</p><p>Controleer voordat je vertrekt of je weet:</p><ul><li>wat de huisarts denkt dat er mogelijk aan de hand is;</li><li>of er onderzoek of een behandeling wordt voorgesteld;</li><li>wat je zelf kunt doen;</li><li>wanneer jullie het resultaat evalueren;</li><li>wanneer je opnieuw contact moet opnemen;</li><li>wat er gebeurt als je klachten niet verminderen;</li><li>of en wanneer een verwijzing wordt overwogen.</li></ul></div>
+      <div className="article-copy"><h2>Bespreek samen wat er is afgesproken</h2><p>Neem na de afspraak rustig je aantekeningen door, bij voorkeur samen met degene die met je mee was. Schrijf vragen die later opkomen meteen op.</p><p>Is iets onduidelijk, veranderen je klachten of helpt de afgesproken aanpak onvoldoende? Neem dan opnieuw contact op met de huisartsenpraktijk.</p><ArticleCallout>Blijf benoemen welke invloed de klachten op je dagelijks leven hebben. Klachten die je structureel beperken, verdienen aandacht.</ArticleCallout></div>
+    </div></section>
+    <RelatedArticles cards={doctorVisitRelated} />
   </main><Footer /></>;
 }
 
@@ -405,5 +451,6 @@ export default function App() {
   if (pathname === '/endometriosetest' || pathname === '/test') return <TestPage />;
   if (pathname === '/wat-is-endometriose') return <WhatIsEndometriosisPage />;
   if (pathname === '/klachten') return <ComplaintsPage />;
+  if (pathname === '/bereid-je-huisartsbezoek-voor') return <DoctorVisitPage />;
   return <HomePage />;
 }
