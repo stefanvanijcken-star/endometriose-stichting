@@ -49,9 +49,9 @@ const getPageHref = (label: string) => {
   return '#';
 };
 
-function Button({ children, variant = 'primary', onClick, full = false, href }: { children: React.ReactNode; variant?: 'primary' | 'orange' | 'white' | 'outline' | 'magenta-outline'; onClick?: () => void; full?: boolean; href?: string }) {
+function Button({ children, variant = 'primary', onClick, full = false, href, download }: { children: React.ReactNode; variant?: 'primary' | 'orange' | 'white' | 'outline' | 'magenta-outline'; onClick?: () => void; full?: boolean; href?: string; download?: boolean | string }) {
   const className = `button button--${variant}${full ? ' button--full' : ''}`;
-  if (href) return <a className={className} href={href}>{children}</a>;
+  if (href) return <a className={className} href={href} download={download}>{children}</a>;
   return <button className={className} onClick={onClick}>{children}</button>;
 }
 
@@ -416,7 +416,7 @@ function DoctorVisitPage() {
       title="Ga voorbereid naar je huisarts"
       copy={<><p>Heb je klachten die mogelijk bij endometriose passen? Een goede voorbereiding helpt je om duidelijk te vertellen wat je ervaart en welke invloed dit op je dagelijks leven heeft.</p><p>Op deze pagina lees je wat je vooraf kunt bijhouden, wat je kunt meenemen en welke vragen je aan de huisarts kunt stellen.</p></>}
       image="/images/doctor-visit-hero.png"
-      primary={<Button href="#vragenlijst">Download de gesprekshulp</Button>}
+      primary={<Button href="/downloads/vragenlijst-huisartsbezoek.pdf" download="vragenlijst-huisartsbezoek.pdf">Download de gesprekshulp</Button>}
       secondary={<Button variant="white" href="#voorbereiden">Zo bereid je je voor</Button>}
     />
     <section className="article-section doctor-summary"><div className="doctor-summary-inner">
@@ -431,7 +431,7 @@ function DoctorVisitPage() {
         <DoctorStep number={3} title="Schrijf op wat je al hebt geprobeerd"><p>Noteer welke medicijnen, anticonceptie of andere oplossingen je gebruikt of hebt geprobeerd.</p><p>Schrijf daarbij op:</p><ul><li>wat je hebt gebruikt;</li><li>of het voldoende hielp;</li><li>of je bijwerkingen kreeg;</li><li>waarom je eventueel bent gestopt.</li></ul><p>Denk bijvoorbeeld aan pijnstillers, hormonale anticonceptie, warmte, rust of fysiotherapie. Verander het gebruik van medicijnen niet zonder overleg met je huisarts of apotheker.</p></DoctorStep>
       </div>
     </div></section>
-    <section className="article-section doctor-download" id="vragenlijst"><div className="article-copy article-cta"><h2>Vul de vragenlijst vooraf in</h2><p>De Endometriose Stichting heeft een uitgebreide vragenlijst gemaakt om je te helpen bij de voorbereiding op je afspraak. De vragen gaan onder andere over je menstruatie, pijn, darm- en blaasklachten, medicijnen en de invloed van je klachten op je leven.</p><p>Vul in wat voor jou relevant is. Je hoeft niet op iedere vraag direct een antwoord te weten. Neem de ingevulde vragenlijst mee op papier of op je telefoon.</p><Button variant="white">Download de vragenlijst</Button></div></section>
+    <section className="article-section doctor-download" id="vragenlijst"><div className="article-copy article-cta"><h2>Vul de vragenlijst vooraf in</h2><p>De Endometriose Stichting heeft een uitgebreide vragenlijst gemaakt om je te helpen bij de voorbereiding op je afspraak. De vragen gaan onder andere over je menstruatie, pijn, darm- en blaasklachten, medicijnen en de invloed van je klachten op je leven.</p><p>Vul in wat voor jou relevant is. Je hoeft niet op iedere vraag direct een antwoord te weten. Neem de ingevulde vragenlijst mee op papier of op je telefoon.</p><Button variant="white" href="/downloads/vragenlijst-huisartsbezoek.pdf" download="vragenlijst-huisartsbezoek.pdf">Download de vragenlijst</Button></div></section>
     <section className="article-section doctor-guidance"><div className="article-flow">
       <div className="article-copy"><h2>Neem iemand mee die je vertrouwt</h2><p>Een afspraak kan spannend of overweldigend zijn. Je mag daarom iemand meenemen, bijvoorbeeld je partner, een familielid, vriend of vriendin.</p><p>Die persoon kan:</p><ul><li>je helpen om je verhaal te vertellen;</li><li>meeluisteren en aantekeningen maken;</li><li>vragen stellen die je zelf vergeet;</li><li>je ondersteunen als je gespannen raakt;</li><li>na afloop samen met jou de afspraken doornemen.</li></ul><p>Bespreek vooraf wat je graag zelf wilt vertellen en waarbij de ander je kan helpen.</p><ArticleCallout>Vraag degene die met je meegaat om de gemaakte afspraken op te schrijven. Zo hoef jij tijdens het gesprek niet alles tegelijk te onthouden.</ArticleCallout></div>
       <div className="article-copy"><h2>Vertel wat de klachten met je leven doen</h2><p>Je hoeft geen medische termen te gebruiken en je hoeft zelf geen diagnose te stellen. Vertel zo concreet mogelijk wat je ervaart, hoe vaak dit gebeurt en wat je door de klachten niet of moeilijk kunt doen.</p><p>Vertel ook wanneer je klachten niet alleen tijdens je menstruatie optreden. Benoem wat je al hebt geprobeerd en of dat voldoende heeft geholpen.</p></div>

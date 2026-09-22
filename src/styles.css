@@ -316,3 +316,29 @@ footer{height:auto}.footer-main{height:auto;min-height:319px;align-items:flex-st
   .doctor-step{padding:24px 16px;flex-direction:column;gap:16px}
   .doctor-download .button{width:100%}
 }
+
+/* Sitebrede ultrawide begrenzing: achtergronden blijven full-bleed, inhoud blijft op Figma-breedte. */
+:root{--site-content-width:1344px;--site-gutter:max(48px,calc((100vw - var(--site-content-width))/2))}
+
+@media(min-width:701px){
+  .header,.hero,.section,.test-header,.article-hero,.article-section{
+    padding-left:var(--site-gutter);
+    padding-right:var(--site-gutter);
+  }
+  .donation-page-intro,.donation-page-content,.endometriosis-test{
+    padding-left:var(--site-gutter);
+    padding-right:var(--site-gutter);
+  }
+  .footer-main{
+    padding-left:var(--site-gutter);
+    padding-right:var(--site-gutter);
+  }
+  .footer-bottom{
+    margin-left:var(--site-gutter);
+    margin-right:var(--site-gutter);
+  }
+  .desktop-mega{
+    padding-left:calc(var(--site-gutter) + 217px);
+    padding-right:var(--site-gutter);
+  }
+}
