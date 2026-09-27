@@ -1,5 +1,67 @@
-import { useState } from 'react';
+import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { createTestResultPdf } from './testResultPdf';
+
+type NavLink = { label: string; href: string };
+type NavGroup = { heading?: string; links: NavLink[] };
+type NavItem = { label: string; href?: string; groups: NavGroup[] };
+
+const nav: NavItem[] = [
+  {
+    label: 'Endometriose',
+    href: '/wat-is-endometriose',
+    groups: [
+      { heading: 'Begrijpen', links: [
+        { label: 'Wat is endometriose?', href: '/wat-is-endometriose' },
+        { label: 'Wat is adenomyose?', href: '/wat-is-adenomyose' },
+      ] },
+      { heading: 'Herkennen', links: [
+        { label: 'Klachten en symptomen', href: '/klachten' },
+        { label: 'Doe de Endometriosetest', href: '/endometriosetest' },
+      ] },
+    ],
+  },
+  {
+    label: 'Zorg',
+    groups: [
+      { heading: 'Diagnose en behandeling', links: [
+        { label: 'Bereid je huisartsbezoek voor', href: '/bereid-je-huisartsbezoek-voor' },
+        { label: 'Onderzoek en diagnose', href: '#' },
+        { label: 'Behandelmogelijkheden', href: '#' },
+      ] },
+    ],
+  },
+  {
+    label: 'Leven & hulp',
+    groups: [
+      { heading: 'Ondersteuning en contact', links: [
+        { label: 'Leven met endometriose', href: '#' },
+        { label: 'Hulp en lotgenotencontact', href: '#' },
+        { label: 'Voor naasten', href: '#' },
+        { label: 'Ervaringsverhalen', href: '#' },
+        { label: 'Agenda', href: '#' },
+      ] },
+    ],
+  },
+  {
+    label: 'Over ons',
+    groups: [
+      { heading: 'De stichting', links: [
+        { label: 'Over de Endometriose Stichting', href: '#' },
+        { label: 'Wat we doen', href: '#' },
+        { label: 'Help de stichting', href: '#' },
+        { label: 'Word vrijwilliger', href: '#' },
+        { label: 'Nieuws, onderzoek en media', href: '#' },
+      ] },
+      { heading: 'Meer informatie', links: [
+        { label: 'Downloads en folders', href: '#' },
+        { label: 'Voor zorgprofessionals', href: '#' },
+        { label: 'Jaarverslagen en ANBI', href: '#' },
+        { label: 'Contact', href: '#' },
+        { label: 'Webshop', href: '#' },
+      ] },
+    ],
+  },
+];
 
 const symptoms = [
   ['Buik- of bekkenpijn', '/images/symptom-pelvic.svg'],
@@ -23,13 +85,6 @@ const stories = [
   ['/images/image-9.jpg', 'Mentale gezondheid', 'Leven met onzekerheid vraagt meer dan alleen medische zorg.'],
 ];
 
-const footerColumns = [
-  ['Endometriose', 'Wat is endometriose?', 'Klachten', 'Diagnose', 'Behandeling', 'Adenomyose'],
-  ['Hulp en ondersteuning', 'Doe de Endometriosetest', 'Bereid je huisartsbezoek voor', 'Zorgwijzer', 'Stel je vraag', 'Leven met endometriose'],
-  ['Ontmoeten', 'Ervaringsverhalen', 'Lotgenotencontact', 'Agenda', 'Nieuws', 'Podcast'],
-  ['Over de stichting', 'Over ons', 'Contact', 'Word vrijwilliger', 'Voor zorgprofessionals', 'Steun ons'],
-];
-
 const testQuestions = [
   'Vanaf de eerste menstruaties heb ik al hevige menstruatiepijn die niet goed reageert op pijnstillers.',
   'Door mijn menstruatieproblemen ben ik al vroeg aan de pil begonnen.',
@@ -41,14 +96,6 @@ const testQuestions = [
   'Ik heb doorbraakbloedingen tijdens pilgebruik.',
 ];
 
-const getPageHref = (label: string) => {
-  if (label === 'Doe de Endometriosetest') return '/endometriosetest';
-  if (label === 'Wat is endometriose?') return '/wat-is-endometriose';
-  if (label === 'Klachten') return '/klachten';
-  if (label === 'Bereid je huisartsbezoek voor') return '/bereid-je-huisartsbezoek-voor';
-  return '#';
-};
-
 function Button({ children, variant = 'primary', onClick, full = false, href, download }: { children: React.ReactNode; variant?: 'primary' | 'orange' | 'white' | 'outline' | 'magenta-outline'; onClick?: () => void; full?: boolean; href?: string; download?: boolean | string }) {
   const className = `button button--${variant}${full ? ' button--full' : ''}`;
   if (href) return <a className={className} href={href} download={download}>{children}</a>;
@@ -59,24 +106,37 @@ function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [active, setActive] = useState<string | null>(null);
   const [mobileSection, setMobileSection] = useState<string | null>(null);
-  const menus: Record<string, [string, string[]][]> = {
-    Endometriose: [['Begrijpen', ['Wat is endometriose?', 'Klachten', 'Adenomyose', 'Veelgestelde vragen']], ['Diagnose en behandeling', ['Diagnose', 'Behandeling', 'Endometriose en vruchtbaarheid', 'Onderzoek en ontwikkelingen']]],
-    'Hulp & Zorg': [['Klachten en diagnose', ['Doe de Endometriosetest', 'Bereid je huisartsbezoek voor', 'Hoe wordt endometriose vastgesteld?', 'Na de diagnose']], ['Informatie en ondersteuning', ['Behandelmogelijkheden', 'Stel je vraag', 'Folders en hulpmiddelen', 'Veelgestelde vragen']]],
-    'Leven met endometriose': [['Dagelijks leven', ['Pijn en vermoeidheid', 'Werk en studie', 'Mentale gezondheid', 'Bewegen en dagelijks functioneren']], ['Relaties en toekomst', ['Relaties en intimiteit', 'Vruchtbaarheid en kinderwens', 'Voor partners en naasten', 'Leven na een behandeling']]],
-    Ontmoeten: [['Ervaringen delen', ['Ervaringsverhalen', 'Lotgenotencontact', 'Stel je vraag']], ['Meedoen en transparantie', ['Agenda', 'Online bijeenkomsten', 'Podcast', 'Nieuws']]],
-    'Over ons': [['De stichting', ['Over de stichting', 'Wat we doen', 'Team en vrijwilligers', 'Samenwerkingen']], ['Meedoen en transparantie', ['Word vrijwilliger', 'Voor zorgprofessionals', 'Jaarverslagen en ANBI', 'Contact']]],
-  };
-  return <header className={`header${mobileOpen ? ' header--open' : ''}${active ? ' header--mega-open' : ''}`} onMouseLeave={() => setActive(null)}>
+  const [hidden, setHidden] = useState(false);
+  const lastScrollY = useRef(0);
+  const activeItem = nav.find(item => item.label === active);
+
+  useEffect(() => {
+    lastScrollY.current = window.scrollY;
+    const onScroll = () => {
+      const currentY = window.scrollY;
+      const delta = currentY - lastScrollY.current;
+      if (currentY < 120) setHidden(false);
+      else if (delta > 4) setHidden(true);
+      else if (delta < -4) setHidden(false);
+      lastScrollY.current = currentY;
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  const shouldHide = hidden && !mobileOpen && !active;
+  return <header className={`header${mobileOpen ? ' header--open' : ''}${active ? ' header--mega-open' : ''}${shouldHide ? ' header--hidden' : ''}`} onMouseLeave={() => setActive(null)}>
     <a className="logo" href="/" aria-label="Endometriose Stichting"><img src="/images/logo.svg" alt="Endometriose Stichting" /></a>
     <nav className="desktop-nav" aria-label="Hoofdnavigatie">
-      {Object.keys(menus).map(label => <div className="nav-item" key={label} onMouseEnter={() => setActive(label)}>
-        <button className={`nav-trigger${active === label ? ' nav-trigger--active' : ''}`} aria-expanded={active === label} onClick={() => setActive(label)}>{label}<img src={active === label ? '/images/chevron-magenta.svg' : '/images/chevron.svg'} alt="" /></button>
+      {nav.map(item => <div className="nav-item" key={item.label} onMouseEnter={() => setActive(item.label)}>
+        {item.href ? <a className={`nav-trigger${active === item.label ? ' nav-trigger--active' : ''}`} href={item.href} aria-haspopup="true" aria-expanded={active === item.label}>{item.label}<img src={active === item.label ? '/images/chevron-magenta.svg' : '/images/chevron.svg'} alt="" /></a>
+          : <button className={`nav-trigger${active === item.label ? ' nav-trigger--active' : ''}`} aria-expanded={active === item.label} onClick={() => setActive(item.label)}>{item.label}<img src={active === item.label ? '/images/chevron-magenta.svg' : '/images/chevron.svg'} alt="" /></button>}
       </div>)}
     </nav>
     <div className="header-actions"><Button variant="orange" href="/doneren"><img src="/images/donate.svg" alt="" />Doneer</Button><Button href="/endometriosetest">Doe de test</Button></div>
     <button className="menu-button" aria-label="Menu openen" aria-expanded={mobileOpen} onClick={() => setMobileOpen(!mobileOpen)}><img src={mobileOpen ? '/images/close.svg' : '/images/menu.svg'} alt="" /></button>
-    {active && <div className="desktop-mega">{menus[active].map(([heading, links]) => <div className="mega-column" key={heading}><strong>{heading}</strong>{links.map(link => <a href={getPageHref(link)} key={link}>{link}</a>)}</div>)}</div>}
-    {mobileOpen && <nav className="mobile-nav">{Object.keys(menus).map(label => <div className="mobile-menu-group" key={label}><button className={mobileSection === label ? 'active' : ''} onClick={() => setMobileSection(mobileSection === label ? null : label)}>{label}<img src={mobileSection === label ? '/images/chevron-magenta.svg' : '/images/chevron.svg'} alt="" /></button>{mobileSection === label && <div className="mobile-submenu">{menus[label].map(([heading, links]) => <div key={heading}><strong>{heading}</strong>{links.map(link => <a href={getPageHref(link)} key={link}>{link}</a>)}</div>)}</div>}</div>)}<div className="mobile-nav-actions"><Button variant="orange" full href="/doneren"><img src="/images/donate.svg" alt="" />Doneer</Button><Button full href="/endometriosetest">Doe de endometriosetest</Button></div></nav>}
+    {activeItem && <div className="desktop-mega">{activeItem.groups.map((group, index) => <div className="mega-column" key={group.heading ?? index}>{group.heading && <strong>{group.heading}</strong>}<div className="mega-links">{group.links.map(link => <a href={link.href} key={link.label}>{link.label}</a>)}</div></div>)}</div>}
+    {mobileOpen && <nav className="mobile-nav">{nav.map(item => <div className="mobile-menu-group" key={item.label}><button className={mobileSection === item.label ? 'active' : ''} aria-expanded={mobileSection === item.label} onClick={() => setMobileSection(mobileSection === item.label ? null : item.label)}>{item.label}<img src={mobileSection === item.label ? '/images/chevron-magenta.svg' : '/images/chevron.svg'} alt="" /></button>{mobileSection === item.label && <div className="mobile-submenu">{item.groups.map((group, index) => <div key={group.heading ?? index}>{group.heading && <strong>{group.heading}</strong>}{group.links.map(link => <a href={link.href} key={link.label}>{link.label}</a>)}</div>)}</div>}</div>)}<div className="mobile-nav-actions"><Button variant="orange" full href="/doneren"><img src="/images/donate.svg" alt="" />Doneer</Button><Button full href="/endometriosetest">Doe de endometriosetest</Button></div></nav>}
   </header>;
 }
 
@@ -273,13 +333,14 @@ function TestPage() {
   </>;
 }
 
-function Footer() { return <footer><div className="footer-main"><div className="footer-brand"><div className="footer-brand-copy"><img src="/images/footer-logo.svg" alt="Endometriose Stichting" /><p>Voor erkenning, betrouwbare kennis en betere endometriosezorg.</p></div><Button variant="white" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}><img src="/images/top-arrow.svg" alt="" />Naar boven</Button></div><div className="footer-columns">{footerColumns.map(([title,...links]) => <div key={title}><h3>{title}</h3>{links.map(link => <a href={getPageHref(link)} key={link}>{link}</a>)}</div>)}</div></div><div className="footer-bottom"><strong>© Endometriose Stichting</strong><div><a href="#">Privacy</a><a href="#">Cookies</a><a href="#">Disclaimer</a><a href="#">Toegangkelijkheid</a></div><span>ANBI/RSIN nummer: 8156.17.987</span></div></footer>; }
+function Footer() { return <footer><div className="footer-main"><div className="footer-brand"><div className="footer-brand-copy"><img src="/images/footer-logo.svg" alt="Endometriose Stichting" /><p>Voor erkenning, betrouwbare kennis en betere endometriosezorg.</p></div><Button variant="white" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}><img src="/images/top-arrow.svg" alt="" />Naar boven</Button></div><div className="footer-columns">{nav.map(item => <div key={item.label}><h3>{item.label}</h3>{item.groups.flatMap(group => group.links).map(link => <a href={link.href} key={link.label}>{link.label}</a>)}</div>)}</div></div><div className="footer-bottom"><strong>© Endometriose Stichting</strong><div><a href="#">Privacy</a><a href="#">Cookies</a><a href="#">Disclaimer</a><a href="#">Toegangkelijkheid</a></div><span>ANBI/RSIN nummer: 8156.17.987</span></div></footer>; }
 
 type RelatedArticle = { title: string; copy: string; image: string; href: string };
 
-function ArticleHero({ title, copy, current, image, primary, secondary, breadcrumbs = ['Endometriose', 'Begrijpen'] }: { title: string; copy: React.ReactNode; current: string; image: string; primary: React.ReactNode; secondary: React.ReactNode; breadcrumbs?: string[] }) {
-  const backgroundImage = "linear-gradient(90deg,rgba(243,134,39,.08),rgba(197,42,114,.2)),linear-gradient(rgba(0,0,0,.2),rgba(0,0,0,.2)),url('" + image + "')";
-  return <section className="article-hero" style={{ backgroundImage }}>
+function ArticleHero({ title, copy, current, image, imageRotated = false, primary, secondary, breadcrumbs = ['Endometriose', 'Begrijpen'] }: { title: string; copy: React.ReactNode; current: string; image: string; imageRotated?: boolean; primary: React.ReactNode; secondary: React.ReactNode; breadcrumbs?: string[] }) {
+  return <section className="article-hero">
+    <div className="article-hero-photo" style={{ backgroundImage: `url('${image}')`, transform: imageRotated ? 'rotate(180deg)' : undefined }} />
+    <div className="article-hero-overlay" />
     <div className="article-hero-inner">
       <div className="article-breadcrumbs" aria-label="Broodkruimelpad">
         <a href="/" aria-label="Home"><img src="/images/breadcrumb-home.svg" alt="" /></a>
@@ -296,7 +357,171 @@ function ArticleSummary({ items }: { items: string[] }) {
 }
 
 function ArticleCallout({ children }: { children: React.ReactNode }) {
-  return <div className="article-callout"><span aria-hidden="true" /><p>{children}</p></div>;
+  return <div className="article-callout"><span aria-hidden="true" /><div>{children}</div></div>;
+}
+
+type TocSectionDef = { id: string; navLabel: string };
+
+const TocContext = createContext<{ openIds: Set<string>; toggle: (id: string) => void } | null>(null);
+
+function ArticleTocNav({ sections, activeId, ghost = false }: { sections: TocSectionDef[]; activeId: string; ghost?: boolean }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [indicator, setIndicator] = useState<{ top: number; height: number } | null>(null);
+
+  useEffect(() => {
+    if (ghost) return;
+    const container = containerRef.current;
+    if (!container) return;
+    const update = () => {
+      const activeLink = container.querySelector<HTMLElement>(`[data-id="${activeId}"]`);
+      if (activeLink) setIndicator({ top: activeLink.offsetTop, height: activeLink.offsetHeight });
+    };
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(container);
+    return () => observer.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeId, ghost, sections.length]);
+
+  return <div className={`article-toc-nav${ghost ? ' article-toc-nav--ghost' : ''}`} aria-hidden={ghost || undefined} ref={containerRef}>
+    {!ghost && indicator && <span className="article-toc-indicator" style={{ transform: `translateY(${indicator.top}px)`, height: indicator.height }} />}
+    {sections.map(section => <a
+      key={section.id}
+      data-id={section.id}
+      href={`#${section.id}`}
+      tabIndex={ghost ? -1 : undefined}
+      className={`article-toc-navlink${!ghost && section.id === activeId ? ' article-toc-navlink--active' : ''}`}
+      onClick={ghost ? undefined : (event) => {
+        event.preventDefault();
+        document.getElementById(section.id)?.scrollIntoView({ behavior: 'smooth' });
+        window.history.replaceState(null, '', `#${section.id}`);
+      }}
+    >{section.navLabel}</a>)}
+  </div>;
+}
+
+function ArticleTocLayout({ sections, children }: { sections: TocSectionDef[]; children: React.ReactNode }) {
+  const ids = sections.map(section => section.id);
+  const idsKey = ids.join('|');
+  const [activeId, setActiveId] = useState(ids[0] ?? '');
+  const [openIds, setOpenIds] = useState<Set<string>>(() => {
+    const hash = window.location.hash.slice(1);
+    return new Set(hash && ids.includes(hash) ? [hash] : []);
+  });
+
+  useEffect(() => {
+    const openFromHash = () => {
+      const hash = window.location.hash.slice(1);
+      if (!hash || !ids.includes(hash)) return;
+      setOpenIds(previous => previous.has(hash) ? previous : new Set(previous).add(hash));
+      requestAnimationFrame(() => document.getElementById(hash)?.scrollIntoView({ behavior: 'smooth' }));
+    };
+    openFromHash();
+    window.addEventListener('hashchange', openFromHash);
+    return () => window.removeEventListener('hashchange', openFromHash);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [idsKey]);
+
+  useEffect(() => {
+    const targets = ids.map(id => document.getElementById(id)).filter((el): el is HTMLElement => !!el);
+    if (!targets.length) return;
+    const observer = new IntersectionObserver(entries => {
+      const visible = entries.filter(entry => entry.isIntersecting);
+      if (!visible.length) return;
+      const top = visible.reduce((a, b) => a.boundingClientRect.top < b.boundingClientRect.top ? a : b);
+      setActiveId(top.target.id);
+    }, { rootMargin: '-140px 0px -65% 0px', threshold: 0 });
+    targets.forEach(el => observer.observe(el));
+    return () => observer.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [idsKey]);
+
+  const toggle = (id: string) => setOpenIds(previous => {
+    const next = new Set(previous);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    return next;
+  });
+
+  return <TocContext.Provider value={{ openIds, toggle }}>
+    <div className="article-toc-row">
+      <ArticleTocNav sections={sections} activeId={activeId} />
+      <div className="article-toc-content">{children}</div>
+      <ArticleTocNav sections={sections} activeId={activeId} ghost />
+    </div>
+  </TocContext.Provider>;
+}
+
+function ArticleTocSection({ id, heading, children }: { id: string; heading: string; children: React.ReactNode }) {
+  const ctx = useContext(TocContext)!;
+  const open = ctx.openIds.has(id);
+  return <div className={`article-toc-section${open ? ' article-toc-section--open' : ''}`} id={id}>
+    <button type="button" className="article-toc-toggle" aria-expanded={open} onClick={() => ctx.toggle(id)}>
+      <h2>{heading}</h2>
+      <img className="article-toc-chevron" src="/images/chevron.svg" alt="" />
+    </button>
+    <div className="article-toc-body">{children}</div>
+  </div>;
+}
+
+function TocSummaryCard({ id, items }: { id: string; items: string[] }) {
+  return <div className="article-toc-summary" id={id}>
+    <img src="/images/article-summary.svg" alt="" />
+    <div><h2>In het kort</h2><ul>{items.map(item => <li key={item}>{item}</li>)}</ul></div>
+  </div>;
+}
+
+function CompareTable({ rows }: { rows: [string, string][] }) {
+  return <div className="compare-table">
+    <div className="compare-row compare-row--head"><span>Adenomyose</span><span className="compare-divider" /><span>Endometriose</span></div>
+    {rows.map(([left, right], index) => <div className={`compare-row${index % 2 === 0 ? ' compare-row--pale' : ''}`} key={left}><span>{left}</span><span className="compare-divider" /><span>{right}</span></div>)}
+  </div>;
+}
+
+function ZoomableImage({ src, alt = '' }: { src: string; alt?: string }) {
+  const [zoom, setZoom] = useState(0);
+
+  useEffect(() => {
+    if (!zoom) return;
+    const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') setZoom(0); };
+    window.addEventListener('keydown', onKey);
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { window.removeEventListener('keydown', onKey); document.body.style.overflow = previousOverflow; };
+  }, [zoom]);
+
+  return <>
+    <img className="article-toc-image" src={src} alt={alt} role="button" tabIndex={0} onClick={() => setZoom(1)} onKeyDown={(event) => { if (event.key === 'Enter') setZoom(1); }} />
+    {zoom > 0 && <div className="image-lightbox" onClick={() => setZoom(0)}>
+      <button type="button" className="image-lightbox-close" aria-label="Sluiten" onClick={(event) => { event.stopPropagation(); setZoom(0); }}>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+      </button>
+      <img
+        className={`image-lightbox-img${zoom === 2 ? ' image-lightbox-img--zoomed' : ''}`}
+        src={src}
+        alt={alt}
+        onClick={(event) => { event.stopPropagation(); setZoom(previous => previous === 1 ? 2 : 1); }}
+      />
+    </div>}
+  </>;
+}
+
+function MailIcon() {
+  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7" /><rect x="2" y="4" width="20" height="16" rx="2" /></svg>;
+}
+
+function ShareIcon() {
+  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 2v13" /><path d="m16 6-4-4-4 4" /><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" /></svg>;
+}
+
+function ArticleShare() {
+  return <div className="article-toc-share">
+    <span aria-hidden="true" />
+    <strong>Pagina delen</strong>
+    <div className="article-actions">
+      <a className="button button--magenta-outline" href={`mailto:?subject=${encodeURIComponent(document.title)}&body=${encodeURIComponent(window.location.href)}`}><MailIcon />Email</a>
+      <button type="button" className="button button--magenta-outline" onClick={() => { if (navigator.share) navigator.share({ url: window.location.href, title: document.title }); else navigator.clipboard?.writeText(window.location.href); }}><ShareIcon />Delen</button>
+    </div>
+  </div>;
 }
 
 function MedicalReview({ inverse = false }: { inverse?: boolean }) {
@@ -313,41 +538,274 @@ function RelatedArticles({ cards }: { cards: RelatedArticle[] }) {
 const whatRelated: RelatedArticle[] = [
   { title: 'Klachten', copy: 'Lees welke klachten bij endometriose kunnen voorkomen.', image: '/images/related-complaints.png', href: '/klachten' },
   { title: 'Diagnose', copy: 'Lees hoe onderzoek en diagnose verlopen en wat je kunt verwachten.', image: '/images/related-diagnosis.png', href: '#' },
-  { title: 'Adenomyose', copy: 'Lees wat adenomyose is en hoe het verschilt van endometriose.', image: '/images/related-adenomyosis.png', href: '#' },
+  { title: 'Adenomyose', copy: 'Lees wat adenomyose is en hoe het verschilt van endometriose.', image: '/images/related-adenomyosis.png', href: '/wat-is-adenomyose' },
 ];
 
 const complaintsRelated: RelatedArticle[] = [
   { title: 'Wat is endometriose?', copy: 'Lees wat endometriose is en welke invloed de aandoening kan hebben.', image: '/images/article-endometriosis-hero.jpg', href: '/wat-is-endometriose' },
-  { title: 'Adenomyose', copy: 'Lees wat adenomyose is en hoe het verschilt van endometriose.', image: '/images/related-adenomyosis.png', href: '#' },
+  { title: 'Adenomyose', copy: 'Lees wat adenomyose is en hoe het verschilt van endometriose.', image: '/images/related-adenomyosis.png', href: '/wat-is-adenomyose' },
   { title: 'Diagnose', copy: 'Lees hoe onderzoek en diagnose verlopen en wat je kunt verwachten.', image: '/images/related-diagnosis.png', href: '#' },
+];
+
+const adenomyosisRelated: RelatedArticle[] = [
+  { title: 'Wat is endometriose?', copy: 'Lees wat endometriose is en welke invloed de aandoening kan hebben.', image: '/images/article-endometriosis-hero.jpg', href: '/wat-is-endometriose' },
+  { title: 'Klachten', copy: 'Lees welke klachten bij endometriose kunnen voorkomen.', image: '/images/related-complaints.png', href: '/klachten' },
+  { title: 'Bereid je huisartsbezoek voor', copy: 'Lees hoe je je afspraak met de huisarts goed voorbereidt.', image: '/images/doctor-visit-hero.png', href: '/bereid-je-huisartsbezoek-voor' },
+];
+
+const whatIsEndometriosisSections: TocSectionDef[] = [
+  { id: 'in-het-kort', navLabel: 'In het kort' },
+  { id: 'in-het-lichaam', navLabel: 'In het lichaam' },
+  { id: 'waar-zit-het', navLabel: 'Waar zit het?' },
+  { id: 'gevolgen', navLabel: 'Gevolgen' },
+  { id: 'mogelijke-oorzaken', navLabel: 'Mogelijke oorzaken' },
+  { id: 'hoe-vaak-komt-het-voor', navLabel: 'Hoe vaak komt het voor?' },
+  { id: 'dagelijks-leven', navLabel: 'Dagelijks leven' },
+  { id: 'behandeling', navLabel: 'Behandeling' },
+  { id: 'hulp-zoeken', navLabel: 'Hulp zoeken' },
 ];
 
 function WhatIsEndometriosisPage() {
   return <><Header /><main className="article-page" id="top">
     <ArticleHero
       current="Wat is endometriose?"
+      breadcrumbs={['Endometriose']}
       title="Wat is endometriose?"
-      copy="Endometriose is een chronische aandoening waarbij weefsel dat lijkt op het slijmvlies aan de binnenkant van de baarmoeder buiten de baarmoeder aanwezig is. Dit kan ontstekingen, littekenweefsel en verklevingen veroorzaken. Waar endometriose voorkomt en hoeveel klachten iemand ervaart, verschilt per persoon."
+      copy="Endometriose is een chronische aandoening waarbij weefsel dat lijkt op baarmoederslijmvlies buiten de baarmoeder aanwezig is. Dit weefsel kan ontstekingen, littekenweefsel en verklevingen veroorzaken. Waar de endometriose zit en hoeveel klachten iemand heeft, verschilt sterk per persoon."
       image="/images/article-endometriosis-hero.jpg"
       primary={<Button href="/klachten">Bekijk de klachten</Button>}
       secondary={<Button variant="white" href="/endometriosetest">Doe de Endometriosetest</Button>}
     />
-    <ArticleSummary items={[
-      'Endometrioseweefsel bevindt zich buiten de baarmoeder.',
-      'Het kan ontstekingen, pijn, littekenweefsel en verklevingen veroorzaken.',
-      'Endometriose wordt meestal gevonden in de buik en het bekken.',
-      'De klachten en de invloed op het dagelijks leven verschillen per persoon.',
-      'De precieze oorzaak van endometriose is nog niet bekend.',
-    ]} />
-    <section className="article-section article-section--pale"><div className="article-flow">
-      <div className="article-copy"><h2>Wat gebeurt er in het lichaam?</h2><p>Aan de binnenkant van de baarmoeder zit het baarmoederslijmvlies. Dit slijmvlies verandert onder invloed van hormonen tijdens de menstruatiecyclus.</p><p>Bij endometriose bevindt zich buiten de baarmoeder weefsel dat op dit baarmoederslijmvlies lijkt. Ook dit weefsel is gevoelig voor hormonen en kan een chronische ontstekingsreactie veroorzaken.</p><p>Door deze ontstekingsreactie kunnen pijn, littekenweefsel en verklevingen ontstaan. Bij verklevingen komen organen of andere structuren in de buik aan elkaar vast te zitten. Dit kan pijn of andere klachten veroorzaken.</p><p>Niet iedereen met endometriose ervaart dezelfde klachten. De hoeveelheid endometriose die bij onderzoek zichtbaar is, zegt bovendien niet altijd iets over de hoeveelheid pijn die iemand heeft.</p><ArticleCallout>Endometriose is meer dan menstruatiepijn. De aandoening kan invloed hebben op verschillende delen van het lichaam en op het dagelijks leven.</ArticleCallout></div>
-      <div className="article-copy"><h2>Waar kan endometriose voorkomen?</h2><p>Endometriose wordt meestal gevonden in de buik en het bekken. Veelvoorkomende plaatsen zijn:</p><ul><li>het buikvlies;</li><li>de eierstokken;</li><li>rondom de baarmoeder en eileiders;</li><li>tussen de baarmoeder en de endeldarm;</li><li>op of rondom de darmen;</li><li>op of rondom de blaas.</li></ul><p>Op de eierstokken kunnen cysten ontstaan die gevuld zijn met oud bloed. Deze cysten worden endometriomen genoemd.</p><p>Endometriose kan soms ook op andere plaatsen in het lichaam voorkomen, bijvoorbeeld rond het middenrif of in een operatielitteken. Dit gebeurt minder vaak.</p><p>De plaats van de endometriose bepaalt niet automatisch hoeveel klachten iemand ervaart. Een kleine plek kan veel pijn veroorzaken, terwijl uitgebreidere endometriose soms weinig klachten geeft.</p></div>
-      <img className="article-diagram" src="/images/endometriosis-diagram.png" alt="Illustratie van plaatsen waar endometriose kan voorkomen" />
-      <div className="article-copy"><h2>Hoe ontstaat endometriose?</h2><p>De precieze oorzaak van endometriose is nog niet bekend. Waarschijnlijk spelen meerdere factoren samen een rol.</p><p>Onderzoekers kijken onder andere naar:</p><ul><li>erfelijke aanleg;</li><li>de werking van hormonen;</li><li>het afweersysteem;</li><li>ontstekingsreacties in het lichaam.</li></ul><p>Endometriose komt in sommige families vaker voor. Dat betekent niet dat iedereen met endometriose ook een familielid met de aandoening heeft.</p><p>Ook is niet aangetoond dat endometriose ontstaat door één bepaalde leefstijl, voedingskeuze of hoeveelheid stress.</p><ArticleCallout>Endometriose is niet jouw schuld.</ArticleCallout></div>
-      <MedicalReview />
-    </div></section>
-    <section className="article-section"><div className="article-copy article-cta"><h2>Herken je klachten bij jezelf?</h2><p>Endometriose kan verschillende klachten veroorzaken, zoals heftige menstruatiepijn, buik- of bekkenpijn, darm- en blaasklachten, pijn tijdens of na seks en extreme vermoeidheid.</p><p>Lees welke klachten kunnen voorkomen of beantwoord acht korte vragen met de Endometriosetest. De test stelt geen diagnose, maar kan helpen bepalen of het verstandig is om je klachten met de huisarts te bespreken.</p><div className="article-actions"><Button href="/klachten">Bekijk de klachten</Button><Button variant="magenta-outline" href="/endometriosetest">Doe de Endometriosetest</Button></div></div></section>
+    <section className="article-section">
+      <ArticleTocLayout sections={whatIsEndometriosisSections}>
+        <TocSummaryCard id="in-het-kort" items={[
+          'Endometriose is weefsel dat lijkt op baarmoederslijmvlies en zich buiten de baarmoeder bevindt.',
+          'Het komt meestal voor in de buik en het bekken.',
+          'Het kan een ontstekingsreactie, littekenweefsel, cysten en verklevingen veroorzaken.',
+          'De plaats en hoeveelheid endometriose zeggen niet altijd hoeveel klachten iemand heeft.',
+          'De precieze oorzaak van endometriose is nog niet bekend.',
+          'Endometriose is chronisch, maar er zijn verschillende manieren om klachten te behandelen.',
+        ]} />
+
+        <ArticleTocSection id="in-het-lichaam" heading="Wat gebeurt er in het lichaam?">
+          <p>Aan de binnenkant van de baarmoeder zit het baarmoederslijmvlies. Dit heet het endometrium. Tijdens de menstruatiecyclus wordt dit slijmvlies dikker. Als er geen zwangerschap ontstaat, wordt een deel ervan tijdens de menstruatie afgestoten.</p>
+          <p>Bij endometriose bevindt zich buiten de baarmoeder weefsel dat op dit baarmoederslijmvlies lijkt. Het is dus niet precies hetzelfde weefsel, maar het heeft wel vergelijkbare eigenschappen.</p>
+          <p>Het endometrioseweefsel kan reageren op hormonen en een ontstekingsreactie in het lichaam veroorzaken. Na verloop van tijd kunnen hierdoor littekenweefsel en verklevingen ontstaan. Verklevingen zijn strengen littekenweefsel waardoor organen of andere weefsels aan elkaar kunnen vastzitten.</p>
+          <p>Op de eierstokken kunnen ook cysten ontstaan die met oud bloed zijn gevuld. Deze cysten worden endometriomen genoemd.</p>
+          <p><strong>Belangrijk om te weten:</strong> De hoeveelheid endometriose zegt niet automatisch iets over de ernst van de klachten. Iemand met weinig zichtbare endometriose kan veel pijn hebben. Iemand met uitgebreide endometriose kan juist weinig klachten ervaren.</p>
+          <ZoomableImage src="/images/endometriosis-body-1.png" />
+        </ArticleTocSection>
+
+        <ArticleTocSection id="waar-zit-het" heading="Waar kan endometriose voorkomen?">
+          <p>Endometriose komt meestal voor in het bekken. Veelvoorkomende plaatsen zijn:</p>
+          <ul><li>op het buikvlies;</li><li>op of rond de eierstokken;</li><li>rond de baarmoeder en eileiders;</li><li>in de ruimte achter de baarmoeder;</li><li>op of in de darm;</li><li>op of in de blaas;</li><li>rond de urineleiders.</li></ul>
+          <p>Endometriose kan oppervlakkig aanwezig zijn, maar ook dieper in omliggend weefsel of een orgaan groeien. In zeldzame gevallen komt endometriose buiten de buik of het bekken voor, bijvoorbeeld rond het middenrif of in de borstkas.</p>
+          <p>De plaats van de endometriose kan invloed hebben op de soort klachten. Endometriose bij de darm kan bijvoorbeeld samengaan met pijn bij de ontlasting. Endometriose bij de blaas kan klachten bij het plassen geven. Toch kun je op basis van klachten alleen niet vaststellen waar endometriose aanwezig is.</p>
+          <ZoomableImage src="/images/endometriosis-body-2.png" />
+        </ArticleTocSection>
+
+        <ArticleTocSection id="gevolgen" heading="Wat kan endometriose veroorzaken?">
+          <p>De ontstekingsreactie rond endometrioseweefsel kan verschillende veranderingen in het lichaam veroorzaken.</p>
+          <p><strong>Ontstekingen</strong></p>
+          <p>Endometriose kan een langdurige ontstekingsreactie veroorzaken. Dit kan bijdragen aan pijn en irritatie van omliggend weefsel.</p>
+          <p><strong>Littekenweefsel en verklevingen</strong></p>
+          <p>Door ontstekingen en herstelreacties kan littekenweefsel ontstaan. Hierdoor kunnen organen of weefsels minder vrij langs elkaar bewegen.</p>
+          <p><strong>Cysten op de eierstokken</strong></p>
+          <p>Op een eierstok kan een endometriosecyste ontstaan. Zo'n cyste wordt ook een endometrioom genoemd.</p>
+          <p><strong>Pijn en overgevoeligheid</strong></p>
+          <p>Wanneer pijn lang aanwezig is, kunnen zenuwen en spieren in en rond het bekken gevoeliger worden. Daardoor kan pijn soms blijven bestaan of sterker worden, ook wanneer er weinig endometriose zichtbaar is.</p>
+          <p>Niet iedereen met endometriose ervaart dezelfde gevolgen. Sommige mensen hebben dagelijks klachten, anderen alleen rond bepaalde momenten in de menstruatiecyclus en weer anderen hebben nauwelijks klachten.</p>
+        </ArticleTocSection>
+
+        <ArticleTocSection id="mogelijke-oorzaken" heading="Hoe ontstaat endometriose?">
+          <p>De precieze oorzaak van endometriose is nog niet bekend. Waarschijnlijk ontstaat de aandoening door een combinatie van verschillende factoren.</p>
+          <p>Onderzoekers kijken onder andere naar:</p>
+          <ul><li>erfelijke aanleg;</li><li>hormonen;</li><li>de werking van het afweersysteem;</li><li>de manier waarop bepaalde cellen zich ontwikkelen en verplaatsen;</li><li>processen die tijdens de ontwikkeling van het lichaam ontstaan.</li></ul>
+          <p>Endometriose komt vaker voor binnen sommige families. Dat betekent dat erfelijke aanleg waarschijnlijk een rol speelt. Het betekent niet dat iedereen met endometriose de aandoening doorgeeft of dat iemand de aandoening zeker krijgt wanneer een familielid deze heeft.</p>
+          <p>Er bestaan verschillende theorieën over het ontstaan van endometriose, maar geen enkele theorie verklaart alle vormen van de aandoening.</p>
+          <ArticleCallout><p className="callout-label">Endometriose is niet jouw schuld.</p><p>De aandoening ontstaat niet doordat je iets verkeerd hebt gedaan. Op dit moment is er ook geen bekende manier om endometriose volledig te voorkomen.</p></ArticleCallout>
+        </ArticleTocSection>
+
+        <ArticleTocSection id="hoe-vaak-komt-het-voor" heading="Hoe vaak komt endometriose voor?">
+          <p>Naar schatting heeft ongeveer 1 op de 10 vrouwen in de vruchtbare levensfase endometriose. Wereldwijd gaat het volgens de Wereldgezondheidsorganisatie om ongeveer 190 miljoen vrouwen.</p>
+          <p>Het werkelijke aantal kan hoger zijn. Niet iedereen heeft herkenbare klachten en het kan lang duren voordat endometriose wordt ontdekt.</p>
+          <p>Klachten kunnen al vanaf de eerste menstruaties ontstaan. Endometriose wordt vaak besproken als een aandoening bij vrouwen, maar kan ook voorkomen bij trans mannen en non-binaire mensen.</p>
+          <ZoomableImage src="/images/endometriosis-body-3.png" />
+        </ArticleTocSection>
+
+        <ArticleTocSection id="dagelijks-leven" heading="Wat kan endometriose voor je leven betekenen?">
+          <p>Endometriose kan veel meer <span className="accent">invloed</span> hebben dan alleen pijn tijdens de menstruatie. De aandoening kan bijvoorbeeld gevolgen hebben voor:</p>
+          <ul><li>energie en slaap;</li><li>werk, school of studie;</li><li>bewegen en dagelijkse activiteiten;</li><li>relaties en intimiteit;</li><li>stemming en mentale gezondheid;</li><li>sociale activiteiten;</li><li>vruchtbaarheid en een eventuele kinderwens.</li></ul>
+          <p>De invloed verschilt sterk per persoon. Sommige mensen kunnen hun dagelijks leven grotendeels voortzetten. Anderen moeten regelmatig afspraken afzeggen, zich ziek melden of activiteiten aanpassen.</p>
+          <p>Ook de klachten kunnen in de loop van de tijd veranderen. Je kunt goede en slechte periodes hebben. Dat maakt endometriose soms moeilijk uit te leggen aan anderen.</p>
+          <p>Endometriose betekent niet automatisch dat iemand minder vruchtbaar is. Veel mensen met endometriose worden zonder medische hulp zwanger. Bij anderen duurt dit langer of kan extra begeleiding nodig zijn.</p>
+          <ArticleCallout><p className="callout-label">Wat je ervaart is echt</p><p>Klachten die niet altijd zichtbaar zijn, kunnen toch veel invloed hebben. Je hoeft je pijn, vermoeidheid of beperkingen niet eerst tegenover anderen te bewijzen om hulp te mogen vragen.</p></ArticleCallout>
+        </ArticleTocSection>
+
+        <ArticleTocSection id="behandeling" heading="Kan endometriose worden behandeld?">
+          <p>Er is op dit moment geen behandeling die endometriose bij iedereen definitief geneest. Er zijn wel verschillende manieren om klachten te verminderen en de invloed op het dagelijks leven te beperken.</p>
+          <p>Mogelijke <span className="accent">behandelingen</span> zijn onder andere:</p>
+          <ul><li>pijnmedicatie;</li><li>hormonale behandeling;</li><li>een operatie;</li><li>bekkenfysiotherapie of andere aanvullende begeleiding;</li><li>ondersteuning bij het omgaan met langdurige pijn en vermoeidheid.</li></ul>
+          <p>Welke behandeling passend is, hangt af van je klachten, persoonlijke situatie, eerdere behandelingen en eventuele kinderwens. Wat voor de één goed werkt, hoeft voor een ander niet de beste keuze te zijn.</p>
+          <p>Samen met een arts bespreek je wat je met een behandeling wilt bereiken en welke voordelen, nadelen en mogelijke bijwerkingen daarbij horen.</p>
+        </ArticleTocSection>
+
+        <ArticleTocSection id="hulp-zoeken" heading="Wanneer is het verstandig om hulp te zoeken?">
+          <p>Menstruatieklachten horen je dagelijks leven niet te beheersen. Maak een afspraak met je huisarts wanneer je bijvoorbeeld:</p>
+          <ul><li>regelmatig zoveel pijn hebt dat je niet kunt werken, studeren, sporten of slapen;</li><li>vaak thuisblijft door menstruatie- of buikklachten;</li><li>langdurige of terugkerende buik- of bekkenpijn hebt;</li><li>pijn hebt tijdens of na seks;</li><li>terugkerende darm- of blaasklachten hebt;</li><li>veel vermoeidheid ervaart zonder duidelijke verklaring;</li><li>vragen of zorgen hebt over vruchtbaarheid;</li><li>jezelf herkent in meerdere klachten van endometriose.</li></ul>
+          <p>Deze klachten kunnen ook een andere oorzaak hebben. Daarom is het belangrijk om ze met een arts te bespreken. Alleen een zorgprofessional kan samen met jou onderzoeken wat er aan de hand is.</p>
+          <p>Je kunt je afspraak voorbereiden door bij te houden wanneer de klachten ontstaan, hoe ernstig ze zijn en wat ze met je dagelijks leven doen.</p>
+          <div className="article-actions"><Button variant="magenta-outline" href="/klachten">Bekijk de klachten</Button><Button variant="magenta-outline" href="/bereid-je-huisartsbezoek-voor">Bereid je huisartsbezoek voor</Button></div>
+        </ArticleTocSection>
+
+        <MedicalReview />
+        <ArticleShare />
+      </ArticleTocLayout>
+    </section>
     <RelatedArticles cards={whatRelated} />
+  </main><Footer /></>;
+}
+
+const whatIsAdenomyosisSections: TocSectionDef[] = [
+  { id: 'in-het-kort-adeno', navLabel: 'In het kort' },
+  { id: 'in-de-baarmoeder', navLabel: 'In de baarmoeder' },
+  { id: 'klachten-adeno', navLabel: 'Klachten' },
+  { id: 'verschil-met-endometriose', navLabel: 'Verschil met endometriose' },
+  { id: 'mogelijke-oorzaken-adeno', navLabel: 'Mogelijke oorzaken' },
+  { id: 'hoe-vaak-komt-het-voor-adeno', navLabel: 'Hoe vaak komt het voor?' },
+  { id: 'onderzoek', navLabel: 'Onderzoek' },
+  { id: 'behandeling-adeno', navLabel: 'Behandeling' },
+  { id: 'dagelijks-leven-adeno', navLabel: 'Dagelijks leven' },
+  { id: 'hulp-zoeken-adeno', navLabel: 'Hulp zoeken' },
+];
+
+function WhatIsAdenomyosisPage() {
+  return <><Header /><main className="article-page" id="top">
+    <ArticleHero
+      current="Wat is adenomyose?"
+      breadcrumbs={['Endometriose']}
+      title="Wat is adenomyose?"
+      copy="Adenomyose is een aandoening waarbij weefsel dat lijkt op baarmoederslijmvlies aanwezig is in de spierwand van de baarmoeder. Dit kan onder andere hevige menstruaties, menstruatiepijn en pijn in het bekken veroorzaken. Adenomyose en endometriose zijn verschillende aandoeningen, maar ze kunnen wel tegelijkertijd voorkomen."
+      image="/images/article-adenomyosis-hero.png"
+      imageRotated
+      primary={<Button href="/klachten">Bekijk de klachten</Button>}
+      secondary={<Button variant="white" href="/bereid-je-huisartsbezoek-voor">Bereid je huisartsbezoek voor</Button>}
+    />
+    <section className="article-section">
+      <ArticleTocLayout sections={whatIsAdenomyosisSections}>
+        <TocSummaryCard id="in-het-kort-adeno" items={[
+          'Bij adenomyose bevindt weefsel dat lijkt op baarmoederslijmvlies zich in de spierwand van de baarmoeder.',
+          'Adenomyose kan hevige en pijnlijke menstruaties veroorzaken.',
+          'Sommige mensen hebben ook buiten de menstruatie pijn of een zwaar gevoel in de onderbuik.',
+          'Adenomyose en endometriose zijn niet hetzelfde, maar kunnen wel samen voorkomen.',
+          'Adenomyose kan meestal met een vaginale echo worden herkend. Soms is aanvullend een MRI nodig.',
+          'Niet iedereen met adenomyose heeft klachten of heeft een behandeling nodig.',
+        ]} />
+
+        <ArticleTocSection id="in-de-baarmoeder" heading="Wat gebeurt er in de baarmoeder?">
+          <p>De wand van de baarmoeder bestaat uit verschillende lagen. Aan de binnenkant zit het baarmoederslijmvlies. Dit heet het endometrium. Daaromheen ligt een dikke spierlaag: het myometrium.</p>
+          <p>Bij adenomyose is in deze spierlaag weefsel aanwezig dat lijkt op baarmoederslijmvlies. Dit weefsel kan reageren op hormonale veranderingen tijdens de menstruatiecyclus. Hierdoor kunnen in de spierwand ontsteking, zwelling en pijn ontstaan.</p>
+          <p>De spierwand kan op sommige plaatsen of in een groter deel van de baarmoeder veranderen. Daardoor kan de baarmoeder soms dikker of groter worden. Niet iedereen merkt daar iets van.</p>
+          <p>Adenomyose kan op twee manieren voorkomen:</p>
+          <ul><li><strong>diffuus:</strong> verspreid over een groter deel van de spierwand;</li><li><strong>focaal:</strong> geconcentreerd op één of enkele plaatsen.</li></ul>
+          <p>Een plaatselijke verdikking door adenomyose wordt ook wel een adenomyoom genoemd.</p>
+          <p><strong>Belangrijk om te weten:</strong> Hoe uitgebreid adenomyose op een echo zichtbaar is, zegt niet altijd hoeveel klachten iemand ervaart. De klachten en invloed op het dagelijks leven verschillen per persoon.</p>
+          <ZoomableImage src="/images/endometriosis-body-1.png" />
+        </ArticleTocSection>
+
+        <ArticleTocSection id="klachten-adeno" heading="Welke klachten kunnen bij adenomyose voorkomen?">
+          <p>De klachten verschillen per persoon. Sommige mensen hebben veel klachten, terwijl anderen nauwelijks iets merken. Adenomyose wordt soms bij toeval op een echo ontdekt.</p>
+          <p>Mogelijke klachten zijn:</p>
+          <ul><li>hevige menstruaties;</li><li>menstruaties die langer duren dan normaal;</li><li>ernstige krampen of pijn tijdens de menstruatie;</li><li>pijn in de onderbuik of het bekken;</li><li>een zwaar, vol of drukkend gevoel in de onderbuik;</li><li>een opgeblazen gevoel;</li><li>pijn tijdens of na seks;</li><li>vermoeidheid.</li></ul>
+          <p>Hevig bloedverlies kan soms leiden tot ijzertekort of bloedarmoede. Dit kan klachten geven zoals vermoeidheid, duizeligheid, hoofdpijn, hartkloppingen of kortademigheid bij inspanning.</p>
+          <p>De klachten kunnen tijdens de menstruatie het sterkst zijn, maar pijn of een zwaar gevoel kan ook op andere momenten voorkomen.</p>
+          <ArticleCallout><p>Menstruatiepijn of bloedverlies dat je belemmert in je dagelijkse activiteiten verdient aandacht. Je hoeft niet te wachten totdat je klachten ondraaglijk worden voordat je hulp vraagt.</p></ArticleCallout>
+        </ArticleTocSection>
+
+        <ArticleTocSection id="verschil-met-endometriose" heading="Wat is het verschil tussen adenomyose en endometriose?">
+          <p>Adenomyose en <span className="accent">endometriose</span> zijn aan elkaar verwante, maar verschillende aandoeningen. Het belangrijkste verschil is de plaats waar het afwijkende weefsel zich bevindt.</p>
+          <p><strong>Adenomyose</strong></p>
+          <p>Bij adenomyose bevindt weefsel dat lijkt op baarmoederslijmvlies zich in de spierwand van de baarmoeder.</p>
+          <p><strong>Endometriose</strong></p>
+          <p>Bij endometriose bevindt vergelijkbaar weefsel zich buiten de baarmoeder, bijvoorbeeld op het buikvlies, de eierstokken, de darm of de blaas.</p>
+          <p>Beide aandoeningen kunnen onder andere menstruatiepijn, buik- of bekkenpijn en pijn tijdens seks veroorzaken. Bij adenomyose staan hevig bloedverlies en een pijnlijke of vergrote baarmoeder vaker op de voorgrond. Bij endometriose kunnen de klachten mede afhangen van de plaatsen waar de endometriose zich bevindt.</p>
+          <p>Je kunt adenomyose en endometriose tegelijkertijd hebben. Op basis van de klachten alleen is daarom niet altijd vast te stellen welke aandoening iemand heeft.</p>
+          <CompareTable rows={[
+            ['In de spierwand van de baarmoeder', 'Buiten de baarmoeder'],
+            ['Vaak hevige en pijnlijke menstruaties', 'Verschillende klachten afhankelijk van de plaats'],
+            ['Kan de baarmoeder dikker of groter maken', 'Kan ontstekingen, cysten en verklevingen veroorzaken'],
+            ['Wordt vaak onderzocht met een vaginale echo', 'Onderzoek kan bestaan uit een gesprek, echo en soms MRI of operatie'],
+          ]} />
+        </ArticleTocSection>
+
+        <ArticleTocSection id="mogelijke-oorzaken-adeno" heading="Hoe ontstaat adenomyose?">
+          <p>De precieze oorzaak van adenomyose is niet bekend. Onderzoekers denken dat verschillende factoren een rol kunnen spelen, waaronder:</p>
+          <ul><li>hormonen;</li><li>erfelijke aanleg;</li><li>ontstekingsprocessen;</li><li>de ontwikkeling en groei van de baarmoeder;</li><li>veranderingen in de grens tussen het baarmoederslijmvlies en de spierwand.</li></ul>
+          <p>Er bestaan verschillende theorieën, maar nog geen daarvan verklaart precies waarom de ene persoon adenomyose krijgt en de andere niet.</p>
+          <p>Adenomyose ontstaat niet doordat je iets verkeerd hebt gedaan. Het wordt ook niet veroorzaakt door een anticonceptiepil of hormoonspiraal. Hormonale anticonceptie kan juist onderdeel zijn van een behandeling om klachten te verminderen.</p>
+          <p>Op dit moment is er geen bekende manier om adenomyose volledig te voorkomen.</p>
+        </ArticleTocSection>
+
+        <ArticleTocSection id="hoe-vaak-komt-het-voor-adeno" heading="Hoe vaak komt adenomyose voor?">
+          <p>Het is niet precies bekend hoeveel mensen adenomyose hebben. Dat komt onder andere doordat:</p>
+          <ul><li>niet iedereen klachten heeft;</li><li>de klachten ook bij andere aandoeningen kunnen voorkomen;</li><li>adenomyose vroeger vaak pas na het verwijderen van de baarmoeder werd vastgesteld;</li><li>verschillende onderzoeken niet altijd dezelfde criteria gebruiken.</li></ul>
+          <p>Adenomyose werd lange tijd vooral herkend bij mensen boven de veertig die eerder zwanger waren geweest. Door betere echoapparatuur en meer kennis weten we inmiddels dat adenomyose ook op jongere leeftijd kan voorkomen.</p>
+          <p>Adenomyose kan voorkomen bij iedereen met een baarmoeder. De aandoening wordt ook regelmatig gezien bij mensen die daarnaast endometriose hebben.</p>
+          <ArticleCallout><p className="callout-label">Niet alleen na je veertigste</p><p>Ook jongere mensen kunnen adenomyose hebben. Leeftijd alleen mag geen reden zijn om aanhoudende klachten niet verder te onderzoeken.</p></ArticleCallout>
+        </ArticleTocSection>
+
+        <ArticleTocSection id="onderzoek" heading="Hoe wordt adenomyose onderzocht?">
+          <p>Klachten zoals hevig bloedverlies en bekkenpijn kunnen verschillende oorzaken hebben. Daarom begint een arts meestal met een gesprek over je klachten, menstruaties en gezondheid.</p>
+          <p>De arts kan bijvoorbeeld vragen:</p>
+          <ul><li>hoeveel pijn je hebt;</li><li>wanneer de pijn optreedt;</li><li>hoe lang en hoeveel je bloedt;</li><li>of de klachten je dagelijks leven beïnvloeden;</li><li>welke medicijnen of behandelingen je al hebt geprobeerd;</li><li>of je nu of later zwanger wilt worden.</li></ul>
+          <p><strong>Vaginale echo</strong></p>
+          <p>Een vaginale echo is meestal het eerste beeldvormende onderzoek bij een vermoeden van adenomyose. Hiermee kan de arts kijken naar de vorm, dikte en structuur van de baarmoederwand.</p>
+          <p>Niet iedere verandering is altijd duidelijk zichtbaar. De ervaring van degene die de echo uitvoert kan daarom een rol spelen.</p>
+          <p><strong>MRI-scan</strong></p>
+          <p>Soms wordt een MRI-scan gemaakt wanneer een echo onvoldoende duidelijkheid geeft of wanneer meer informatie nodig is voor een behandelkeuze.</p>
+          <p>Met een echo of MRI kan vaak een sterke verdenking op adenomyose worden vastgesteld. Het is niet altijd mogelijk om met volledige zekerheid te zeggen hoeveel van de klachten door adenomyose wordt veroorzaakt.</p>
+          <ZoomableImage src="/images/endometriosis-body-2.png" />
+        </ArticleTocSection>
+
+        <ArticleTocSection id="behandeling-adeno" heading="Kan adenomyose worden behandeld?">
+          <p>Niet iedereen met adenomyose heeft behandeling nodig. Wanneer adenomyose op een echo wordt gezien maar je geen klachten hebt, kan samen met de arts worden besloten om niets te behandelen.</p>
+          <p>Heb je wel klachten, dan wordt de behandeling afgestemd op:</p>
+          <ul><li>de soort en ernst van je klachten;</li><li>hoeveel bloed je verliest;</li><li>je leeftijd en gezondheid;</li><li>eerdere behandelingen;</li><li>mogelijke bijwerkingen;</li><li>een huidige of toekomstige kinderwens;</li><li>je eigen voorkeuren.</li></ul>
+          <p>Mogelijke behandelingen zijn onder andere:</p>
+          <p><strong>Medicijnen tegen pijn</strong></p>
+          <p>Pijnstillers of ontstekingsremmende medicijnen kunnen helpen om menstruatiepijn te verminderen. Bespreek met een arts of apotheker welk middel veilig en passend is.</p>
+          <p><strong>Medicijnen tegen hevig bloedverlies</strong></p>
+          <p>Er bestaan medicijnen die het bloedverlies tijdens de menstruatie kunnen verminderen. Een arts kan beoordelen of deze voor jou geschikt zijn.</p>
+          <p><strong>Hormonale behandeling</strong></p>
+          <p>Een hormoonspiraal, anticonceptiepil of ander hormonaal middel kan het bloedverlies en de pijn verminderen. Het effect en de mogelijke bijwerkingen verschillen per persoon.</p>
+          <p><strong>Operatie</strong></p>
+          <p>Wanneer andere behandelingen onvoldoende helpen, kan een operatie worden besproken. Het verwijderen van de baarmoeder behandelt adenomyose definitief, omdat de aandoening zich in de baarmoederwand bevindt.</p>
+          <p>Een baarmoederverwijdering is een ingrijpende en onomkeerbare operatie. Daarna kun je niet meer zwanger worden. Deze behandeling wordt daarom alleen na een zorgvuldige afweging besproken en is niet voor iedereen nodig of passend.</p>
+          <ArticleCallout><p>Je hoeft een behandelkeuze niet alleen te maken. Vraag naar de verwachte voordelen, mogelijke nadelen, alternatieven en wat de behandeling betekent voor een eventuele kinderwens.</p></ArticleCallout>
+        </ArticleTocSection>
+
+        <ArticleTocSection id="dagelijks-leven-adeno" heading="Wat kan adenomyose voor je dagelijks leven betekenen?">
+          <p>Hevige menstruaties en langdurige pijn kunnen invloed hebben op verschillende delen van het leven. Je kunt bijvoorbeeld moeite hebben met:</p>
+          <ul><li>slapen;</li><li>werken of studeren;</li><li>sporten en bewegen;</li><li>sociale afspraken;</li><li>reizen;</li><li>seks en intimiteit;</li><li>het verdelen van je energie.</li></ul>
+          <p>Bij hevig bloedverlies kan ook de onzekerheid over doorlekken veel aandacht vragen. Sommige mensen plannen activiteiten rondom hun menstruatie of nemen altijd extra menstruatieproducten en kleding mee.</p>
+          <p>Langdurige pijn en vermoeidheid kunnen daarnaast invloed hebben op je stemming. Je kunt je gefrustreerd, onzeker of alleen voelen. Dit betekent niet dat de klachten 'tussen je oren zitten'. Lichamelijke klachten en mentale belasting kunnen elkaar wel beïnvloeden.</p>
+          <p>Het kan helpen om je klachten en bloedverlies een aantal cycli bij te houden. Zo krijg je zelf meer inzicht en kun je een arts duidelijker laten zien wat de invloed op je leven is.</p>
+          <ZoomableImage src="/images/endometriosis-body-3.png" />
+        </ArticleTocSection>
+
+        <ArticleTocSection id="hulp-zoeken-adeno" heading="Wanneer is het verstandig om hulp te zoeken?">
+          <p>Maak een afspraak met je huisarts wanneer:</p>
+          <ul><li>je menstruaties steeds pijnlijker of heviger worden;</li><li>je regelmatig doorlekt of 's nachts vaak moet verschonen;</li><li>pijn of bloedverlies je werk, studie, slaap of sociale leven beïnvloedt;</li><li>je ook buiten de menstruatie buik- of bekkenpijn hebt;</li><li>je pijn hebt tijdens of na seks;</li><li>je vaak een zwaar of drukkend gevoel in de onderbuik hebt;</li><li>je je langdurig moe, duizelig of kortademig voelt;</li><li>je tussen menstruaties of na seks bloed verliest;</li><li>je vragen hebt over zwanger worden;</li><li>je je zorgen maakt over je klachten.</li></ul>
+          <p>Deze klachten kunnen ook een andere oorzaak hebben, zoals endometriose, een vleesboom of een andere gynaecologische aandoening. Een arts kan samen met jou onderzoeken wat er aan de hand is.</p>
+          <p>Bereid de afspraak voor door bij te houden wanneer je klachten optreden, hoeveel bloed je verliest en wat de klachten met je dagelijks leven doen.</p>
+          <div className="article-actions"><Button variant="magenta-outline" href="/bereid-je-huisartsbezoek-voor">Bereid je huisartsbezoek voor</Button><Button variant="magenta-outline">Download het klachtendagboek</Button></div>
+        </ArticleTocSection>
+
+        <MedicalReview />
+        <ArticleShare />
+      </ArticleTocLayout>
+    </section>
+    <RelatedArticles cards={adenomyosisRelated} />
   </main><Footer /></>;
 }
 
@@ -450,6 +908,7 @@ export default function App() {
   if (pathname === '/doneren' || pathname === '/donatie') return <DonationPage />;
   if (pathname === '/endometriosetest' || pathname === '/test') return <TestPage />;
   if (pathname === '/wat-is-endometriose') return <WhatIsEndometriosisPage />;
+  if (pathname === '/wat-is-adenomyose') return <WhatIsAdenomyosisPage />;
   if (pathname === '/klachten') return <ComplaintsPage />;
   if (pathname === '/bereid-je-huisartsbezoek-voor') return <DoctorVisitPage />;
   return <HomePage />;
