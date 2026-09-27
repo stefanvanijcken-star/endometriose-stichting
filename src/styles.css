@@ -350,7 +350,7 @@ footer{height:auto}.footer-main{height:auto;min-height:319px;align-items:flex-st
 /* Artikeltemplate met sticky paginanavigatie — Figma nodes 448:432 en 452:789. */
 .accent{color:var(--magenta);text-decoration:underline}
 
-.article-toc-row{display:flex;justify-content:space-between;gap:40px;align-items:flex-start}
+.article-toc-row{width:100%;display:flex;justify-content:space-between;gap:40px;align-items:flex-start}
 .article-toc-nav{flex:0 0 auto;display:flex;flex-direction:column;gap:8px;position:sticky;top:132px}
 .article-toc-nav--ghost{visibility:hidden;pointer-events:none;position:static}
 .article-toc-navlink{position:relative;padding:0;color:var(--muted);font-size:18px;line-height:1.5;white-space:nowrap}
@@ -359,7 +359,7 @@ footer{height:auto}.footer-main{height:auto;min-height:319px;align-items:flex-st
 
 .article-toc-content{flex:1 1 auto;min-width:0;max-width:640px;display:flex;flex-direction:column;gap:64px}
 
-.article-toc-summary{align-self:stretch;display:flex;gap:24px;padding:24px;background:#F8E7F0;border-radius:24px}
+.article-toc-summary{align-self:stretch;display:flex;gap:24px;padding:24px;background:#F8E7F0;border-radius:24px;scroll-margin-top:132px}
 .article-toc-summary>img{width:48px;height:48px;flex:none}
 .article-toc-summary>div{min-width:0;display:flex;flex-direction:column;gap:16px}
 .article-toc-summary h2{font-size:32px;line-height:1.2;letter-spacing:-.16px;margin:0}
@@ -401,7 +401,7 @@ footer{height:auto}.footer-main{height:auto;min-height:319px;align-items:flex-st
   .article-toc-row{flex-direction:column;gap:24px}
   .article-toc-nav,.article-toc-nav--ghost{display:none}
   .article-toc-content{max-width:none;gap:40px}
-  .article-toc-summary{flex-direction:column;gap:16px}
+  .article-toc-summary{flex-direction:column;gap:16px;scroll-margin-top:104px}
   .article-toc-summary h2{font-size:24px}
   .article-toc-section{scroll-margin-top:104px}
   .article-toc-toggle{cursor:pointer}
