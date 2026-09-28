@@ -108,8 +108,6 @@ function Header() {
   const [mobileSection, setMobileSection] = useState<string | null>(null);
   const [hidden, setHidden] = useState(false);
   const lastScrollY = useRef(0);
-  const activeItem = nav.find(item => item.label === active);
-
   useEffect(() => {
     lastScrollY.current = window.scrollY;
     const onScroll = () => {
@@ -124,6 +122,13 @@ function Header() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = previousOverflow; };
+  }, [mobileOpen]);
+
   const shouldHide = hidden && !mobileOpen && !active;
   return <header className={`header${mobileOpen ? ' header--open' : ''}${active ? ' header--mega-open' : ''}${shouldHide ? ' header--hidden' : ''}`} onMouseLeave={() => setActive(null)}>
     <a className="logo" href="/" aria-label="Endometriose Stichting"><img src="/images/logo.svg" alt="Endometriose Stichting" /></a>
@@ -135,7 +140,7 @@ function Header() {
     </nav>
     <div className="header-actions"><Button variant="orange" href="/doneren"><img src="/images/donate.svg" alt="" />Doneer</Button><Button href="/endometriosetest">Doe de test</Button></div>
     <button className="menu-button" aria-label="Menu openen" aria-expanded={mobileOpen} onClick={() => setMobileOpen(!mobileOpen)}><img src={mobileOpen ? '/images/close.svg' : '/images/menu.svg'} alt="" /></button>
-    {activeItem && <div className="desktop-mega">{activeItem.groups.map((group, index) => <div className="mega-column" key={group.heading ?? index}>{group.heading && <strong>{group.heading}</strong>}<div className="mega-links">{group.links.map(link => <a href={link.href} key={link.label}>{link.label}</a>)}</div></div>)}</div>}
+    {active && <div className="desktop-mega">{nav.map(item => <div className={`desktop-mega-panel${item.label === active ? ' desktop-mega-panel--visible' : ''}`} key={item.label} aria-hidden={item.label !== active}>{item.groups.map((group, index) => <div className="mega-column" key={group.heading ?? index}>{group.heading && <strong>{group.heading}</strong>}<div className="mega-links">{group.links.map(link => <a href={link.href} key={link.label} tabIndex={item.label === active ? undefined : -1}>{link.label}</a>)}</div></div>)}</div>)}</div>}
     {mobileOpen && <nav className="mobile-nav">{nav.map(item => <div className="mobile-menu-group" key={item.label}><button className={mobileSection === item.label ? 'active' : ''} aria-expanded={mobileSection === item.label} onClick={() => setMobileSection(mobileSection === item.label ? null : item.label)}>{item.label}<img src={mobileSection === item.label ? '/images/chevron-magenta.svg' : '/images/chevron.svg'} alt="" /></button>{mobileSection === item.label && <div className="mobile-submenu">{item.groups.map((group, index) => <div key={group.heading ?? index}>{group.heading && <strong>{group.heading}</strong>}{group.links.map(link => <a href={link.href} key={link.label}>{link.label}</a>)}</div>)}</div>}</div>)}<div className="mobile-nav-actions"><Button variant="orange" full href="/doneren"><img src="/images/donate.svg" alt="" />Doneer</Button><Button full href="/endometriosetest">Doe de endometriosetest</Button></div></nav>}
   </header>;
 }
