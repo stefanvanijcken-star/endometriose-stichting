@@ -168,7 +168,7 @@ function Agenda() {
     { title: 'Vraagavond met een ervaringsdeskundige', date: 'Online · 23 augustus · 19.30 uur', description: 'Stel je vragen in een veilige online omgeving aan een opgeleide ervaringsdeskundige. Er is ruimte voor herkenning, praktische tips en persoonlijke situaties.', details: ['Online via videobellen', '19.30–21.00 uur', 'Gratis deelname'] },
     { title: 'Lotgenotendag: ruimte voor jouw verhaal', date: 'Utrecht · 2 september · 13.00 uur', description: 'Een toegankelijke middag om ervaringen uit te wisselen, nieuwe inzichten op te doen en andere mensen met endometriose te ontmoeten.', details: ['Utrecht, centraal gelegen', '13.00–16.30 uur', 'Inclusief koffie en thee'] },
   ];
-  return <section className={`section agenda${openEvent !== null ? ' agenda--expanded' : ''}`}><SectionHeading title="Ontmoet, leer en deel." copy="Online en door het hele land organiseert de stichting bijeenkomsten voor iedereen die met endometriose te maken heeft." action={<Button variant="outline">Bekijk de volledige agenda</Button>} /><div className="event-list">{events.map((event,index) => { const isOpen = openEvent === index; return <article className={`event${isOpen ? ' event--open' : ''}`} key={event.title}><div className="event-main"><div className="event-summary"><h3>{event.title}</h3><p>{event.date}</p><button className="event-more" aria-expanded={isOpen} onClick={() => setOpenEvent(isOpen ? null : index)}>{isOpen ? 'Lees minder' : 'Lees meer'} <img src="/images/arrow-right.svg" alt="" /></button></div><Button>Schrijf je in!</Button></div>{isOpen && <div className="event-details"><p>{event.description}</p><ul>{event.details.map(detail => <li key={detail}>{detail}</li>)}</ul></div>}</article>; })}</div><div className="mobile-section-action"><Button variant="outline" full>Bekijk de volledige agenda</Button></div></section>;
+  return <section className={`section agenda${openEvent !== null ? ' agenda--expanded' : ''}`}><SectionHeading title="Ontmoet, leer en deel." copy="Online en door het hele land organiseert de stichting bijeenkomsten voor iedereen die met endometriose te maken heeft." action={<Button variant="outline">Bekijk de volledige agenda</Button>} /><div className="event-list">{events.map((event,index) => { const isOpen = openEvent === index; return <article className={`event${isOpen ? ' event--open' : ''}`} key={event.title}><div className="event-main"><div className="event-summary"><h3>{event.title}</h3><p>{event.date}</p><button className="event-more" aria-expanded={isOpen} onClick={() => setOpenEvent(isOpen ? null : index)}>{isOpen ? 'Lees minder' : 'Lees meer'} <img src="/images/arrow-right.svg" alt="" /></button></div><Button variant="magenta-outline">Schrijf je in!</Button></div>{isOpen && <div className="event-details"><p>{event.description}</p><ul>{event.details.map(detail => <li key={detail}>{detail}</li>)}</ul></div>}</article>; })}</div><div className="mobile-section-action"><Button variant="outline" full>Bekijk de volledige agenda</Button></div></section>;
 }
 
 function About() { return <section className="section split about"><div className="split-copy"><SectionHeading title="Over de Endometriose Stichting." copy="We delen betrouwbare kennis, brengen mensen bij elkaar en maken ons sterk voor snellere diagnoses en toegankelijke endometriosezorg." /><ul className="facts"><li><img src="/images/fact-volunteers.svg" alt="" />25+ ervaringsdeskundige vrijwilligers</li><li><img src="/images/fact-country.svg" alt="" />Landelijk actief voor mensen met endometriose</li></ul><div className="button-row"><Button>Over de stichting</Button><Button variant="orange">Word vrijwilliger</Button></div></div><img src="/images/image-6.jpg" alt="Presentatie van de stichting" /></section>; }
@@ -340,9 +340,9 @@ function TestPage() {
 
 function Footer() { return <footer><div className="footer-main"><div className="footer-brand"><div className="footer-brand-copy"><img src="/images/footer-logo.svg" alt="Endometriose Stichting" /><p>Voor erkenning, betrouwbare kennis en betere endometriosezorg.</p></div><Button variant="white" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}><img src="/images/top-arrow.svg" alt="" />Naar boven</Button></div><div className="footer-columns">{nav.map(item => <div key={item.label}><h3>{item.label}</h3>{item.groups.flatMap(group => group.links).map(link => <a href={link.href} key={link.label}>{link.label}</a>)}</div>)}</div></div><div className="footer-bottom"><strong>© Endometriose Stichting</strong><div><a href="#">Privacy</a><a href="#">Cookies</a><a href="#">Disclaimer</a><a href="#">Toegangkelijkheid</a></div><span>ANBI/RSIN nummer: 8156.17.987</span></div></footer>; }
 
-type RelatedArticle = { title: string; copy: string; image: string; href: string };
+type RelatedArticle = { title: string; copy: string; image: string; href: string; cta?: string };
 
-function ArticleHero({ title, copy, current, image, imageRotated = false, primary, secondary, breadcrumbs = ['Endometriose', 'Begrijpen'] }: { title: string; copy: React.ReactNode; current: string; image: string; imageRotated?: boolean; primary: React.ReactNode; secondary: React.ReactNode; breadcrumbs?: string[] }) {
+function ArticleHero({ title, copy, current, image, imageRotated = false, label, primary, secondary, breadcrumbs = ['Endometriose', 'Begrijpen'] }: { title: string; copy: React.ReactNode; current: string; image: string; imageRotated?: boolean; label?: string; primary: React.ReactNode; secondary: React.ReactNode; breadcrumbs?: string[] }) {
   return <section className="article-hero">
     <div className="article-hero-photo" style={{ backgroundImage: `url('${image}')`, transform: imageRotated ? 'rotate(180deg)' : undefined }} />
     <div className="article-hero-overlay" />
@@ -351,7 +351,7 @@ function ArticleHero({ title, copy, current, image, imageRotated = false, primar
         <a href="/" aria-label="Home"><img src="/images/breadcrumb-home.svg" alt="" /></a>
         {[...breadcrumbs, current].map(item => <span key={item}><img src="/images/breadcrumb-chevron.svg" alt="" />{item}</span>)}
       </div>
-      <div className="article-hero-copy"><h1>{title}</h1><div className="article-hero-description">{typeof copy === 'string' ? <p>{copy}</p> : copy}</div></div>
+      <div className="article-hero-copy">{label && <p className="article-hero-label">{label}</p>}<h1>{title}</h1><div className="article-hero-description">{typeof copy === 'string' ? <p>{copy}</p> : copy}</div></div>
       <div className="article-actions">{primary}{secondary}</div>
     </div>
   </section>;
@@ -456,12 +456,12 @@ function ArticleTocLayout({ sections, children }: { sections: TocSectionDef[]; c
   </TocContext.Provider>;
 }
 
-function ArticleTocSection({ id, heading, children }: { id: string; heading: string; children: React.ReactNode }) {
+function ArticleTocSection({ id, heading, icon, children }: { id: string; heading: string; icon?: React.ReactNode; children: React.ReactNode }) {
   const ctx = useContext(TocContext)!;
   const open = ctx.openIds.has(id);
   return <div className={`article-toc-section${open ? ' article-toc-section--open' : ''}`} id={id}>
     <button type="button" className="article-toc-toggle" aria-expanded={open} onClick={() => ctx.toggle(id)}>
-      <h2>{heading}</h2>
+      <span className="article-toc-toggle-heading">{icon && <span className="article-toc-icon">{icon}</span>}<h2>{heading}</h2></span>
       <img className="article-toc-chevron" src="/images/chevron.svg" alt="" />
     </button>
     <div className="article-toc-body">{children}</div>
@@ -518,6 +518,30 @@ function ShareIcon() {
   return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 2v13" /><path d="m16 6-4-4-4 4" /><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" /></svg>;
 }
 
+function DropletIcon() {
+  return <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.5-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z" /></svg>;
+}
+
+function PersonStandingIcon() {
+  return <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="5" r="1" /><path d="m9 20 3-6 3 6" /><path d="m6 8 6 2 6-2" /><path d="M12 10v4" /></svg>;
+}
+
+function ToiletIcon() {
+  return <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M7 12h13a1 1 0 0 1 1 1 5 5 0 0 1-5 5h-.6a.5.5 0 0 0-.4.8l1.5 2.4a.5.5 0 0 1-.4.8H5.4a.5.5 0 0 1-.4-.8L7 18" /><path d="M7 12a5 5 0 0 1-5-5V4a1 1 0 0 1 1-1h11a1 1 0 0 1 1 1v3a5 5 0 0 1-5 5H7Z" /></svg>;
+}
+
+function HeartIcon() {
+  return <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" /></svg>;
+}
+
+function BedDoubleIcon() {
+  return <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M2 20v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8" /><path d="M4 10V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4" /><path d="M12 4v6" /><path d="M2 18h20" /></svg>;
+}
+
+function SproutIcon() {
+  return <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M7 20h10" /><path d="M10 20c0-4.4-1.5-7-4-8.5C3.5 10 2 8 2 6a4 4 0 0 1 4-4c2 0 3 1 4 2 1-1 2-2 4-2a4 4 0 0 1 4 4c0 2-1.5 4-4 5.5-2.5 1.5-4 4.1-4 8.5" /><path d="M10 20a4 4 0 1 0-8 0" /></svg>;
+}
+
 function ArticleShare() {
   return <div className="article-toc-share">
     <span aria-hidden="true" />
@@ -529,15 +553,15 @@ function ArticleShare() {
   </div>;
 }
 
-function MedicalReview({ inverse = false }: { inverse?: boolean }) {
+function MedicalReview({ inverse = false, date = '13-09-2026', reviewer = 'Lennie van Hanegem', note = 'Deze informatie is algemeen en vervangt geen persoonlijk medisch advies. Bespreek vragen of zorgen over je gezondheid met je huisarts of behandelend arts.' }: { inverse?: boolean; date?: string; reviewer?: string; note?: string }) {
   return <div className={'medical-review' + (inverse ? ' medical-review--inverse' : '')}>
-    <p><strong>Laatste inhoudelijke controle:</strong> 13-09-2026<br /><strong>Medisch gecontroleerd door:</strong> Lennie van Hanegem</p>
-    <p>Deze informatie is algemeen en vervangt geen persoonlijk medisch advies. Bespreek vragen of zorgen over je gezondheid met je huisarts of behandelend arts.</p>
+    <p><strong>Laatste inhoudelijke controle:</strong> {date}<br /><strong>Medisch gecontroleerd door:</strong> {reviewer}</p>
+    <p>{note}</p>
   </div>;
 }
 
 function RelatedArticles({ cards }: { cards: RelatedArticle[] }) {
-  return <section className="article-section article-related"><div className="article-wide"><h2>Lees ook</h2><div className="article-related-grid">{cards.map(card => <a className="article-related-card" href={card.href} key={card.title}><img src={card.image} alt="" /><div><div><h3>{card.title}</h3><p>{card.copy}</p></div><span className="button button--magenta-outline">Meer info</span></div></a>)}</div></div></section>;
+  return <section className="article-section article-related"><div className="article-wide"><h2>Lees ook</h2><div className="article-related-grid">{cards.map(card => <a className="article-related-card" href={card.href} key={card.title}><img src={card.image} alt="" /><div><div><h3>{card.title}</h3><p>{card.copy}</p></div><span className="button button--magenta-outline">{card.cta ?? 'Meer info'}</span></div></a>)}</div></div></section>;
 }
 
 const whatRelated: RelatedArticle[] = [
@@ -547,9 +571,9 @@ const whatRelated: RelatedArticle[] = [
 ];
 
 const complaintsRelated: RelatedArticle[] = [
-  { title: 'Wat is endometriose?', copy: 'Lees wat endometriose is en welke invloed de aandoening kan hebben.', image: '/images/article-endometriosis-hero.jpg', href: '/wat-is-endometriose' },
-  { title: 'Adenomyose', copy: 'Lees wat adenomyose is en hoe het verschilt van endometriose.', image: '/images/related-adenomyosis.png', href: '/wat-is-adenomyose' },
-  { title: 'Diagnose', copy: 'Lees hoe onderzoek en diagnose verlopen en wat je kunt verwachten.', image: '/images/related-diagnosis.png', href: '#' },
+  { title: 'Wat is endometriose?', copy: 'Lees wat er bij endometriose in het lichaam gebeurt en waar de aandoening kan voorkomen.', image: '/images/article-endometriosis-hero.jpg', href: '/wat-is-endometriose' },
+  { title: 'Bereid je huisartsbezoek voor', copy: 'Lees hoe je klachten en vragen kunt voorbereiden en hoe je samen een concrete vervolgstap afspreekt.', image: '/images/doctor-visit-hero.png', href: '/bereid-je-huisartsbezoek-voor' },
+  { title: 'Onderzoek en diagnose', copy: 'Lees wat je kunt verwachten van gesprekken, onderzoeken en een mogelijke verwijzing.', image: '/images/related-diagnosis.png', href: '#' },
 ];
 
 const adenomyosisRelated: RelatedArticle[] = [
@@ -814,94 +838,304 @@ function WhatIsAdenomyosisPage() {
   </main><Footer /></>;
 }
 
-const complaintCards = [
-  ['Heftige menstruatiepijn', 'Pijn die je dagelijkse leven, school, werk, slaap of sport belemmert.', '/images/symptom-menstruation.svg'],
-  ['Buik- of bekkenpijn', 'Terugkerende of aanhoudende pijn, ook buiten je menstruatie.', '/images/symptom-pelvic.svg'],
-  ['Darm- of blaasklachten', 'Pijn of andere klachten rond ontlasting en plassen.', '/images/symptom-bowel-bladder.svg'],
-  ['Pijn tijdens of na seks', 'Pijn of een onaangenaam gevoel tijdens of na seksuele activiteit.', '/images/symptom-sex.svg'],
-  ['Extreme vermoeidheid', 'Een uitputting die niet verdwijnt na een goede nachtrust.', '/images/symptom-fatigue.svg'],
-  ['Vruchtbaarheidsproblemen', 'Moeilijk zwanger worden kan samenhangen met endometriose.', '/images/symptom-fertility.svg'],
+const complaintCards: [string, string, () => React.ReactElement][] = [
+  ['Heftige menstruatiepijn', 'Pijn die school, werk, sport, sociale activiteiten of slaap belemmert.', DropletIcon],
+  ['Buik- of bekkenpijn', 'Terugkerende of aanhoudende pijn, ook buiten je menstruatie.', PersonStandingIcon],
+  ['Darm- of blaasklachten', 'Pijn of andere klachten rondom de ontlasting en het plassen.', ToiletIcon],
+  ['Pijn tijdens of na seks', 'Pijn of een onaangenaam gevoel tijdens of na seksuele activiteit.', HeartIcon],
+  ['Extreme vermoeidheid', 'Een gevoel van uitputting dat niet verdwijnt na een goede nachtrust.', BedDoubleIcon],
+  ['Vruchtbaarheidsproblemen', 'Moeilijk zwanger worden kan bij sommige mensen samenhangen met endometriose.', SproutIcon],
 ];
 
-function ComplaintDetail({ title, icon, children, callout }: { title: string; icon: string; children: React.ReactNode; callout?: string }) {
-  return <div className="complaint-detail"><span className="complaint-detail-icon"><img src={icon} alt="" /></span><div className="article-copy"><h2>{title}</h2>{children}{callout && <ArticleCallout>{callout}</ArticleCallout>}</div></div>;
-}
+const complaintsSections: TocSectionDef[] = [
+  { id: 'in-het-kort-klachten', navLabel: 'In het kort' },
+  { id: 'herken-je-dit', navLabel: 'Herken je dit?' },
+  { id: 'klachten-verschillen', navLabel: 'Verschillen per persoon' },
+  { id: 'heftige-menstruatiepijn', navLabel: 'Menstruatiepijn' },
+  { id: 'buik-bekkenpijn', navLabel: 'Buik- en bekkenpijn' },
+  { id: 'darm-blaasklachten', navLabel: 'Darm en blaas' },
+  { id: 'pijn-seks', navLabel: 'Seks' },
+  { id: 'extreme-vermoeidheid', navLabel: 'Vermoeidheid' },
+  { id: 'vruchtbaarheid', navLabel: 'Vruchtbaarheid' },
+  { id: 'andere-klachten', navLabel: 'Andere klachten' },
+  { id: 'klachten-veranderen', navLabel: 'Klachten bijhouden' },
+  { id: 'wanneer-huisarts', navLabel: 'Naar de huisarts' },
+  { id: 'wat-nu', navLabel: 'Wat kun je doen?' },
+];
 
 function ComplaintsPage() {
   return <><Header /><main className="article-page" id="top">
     <ArticleHero
-      current="Klachten"
-      title="Klachten van endometriose"
-      copy="Endometriose kan verschillende klachten veroorzaken. Welke klachten je hebt en hoeveel last je daarvan ervaart, verschilt per persoon. Sommige klachten ontstaan vooral rond de menstruatie, andere kunnen op ieder moment aanwezig zijn."
+      current="Klachten en symptomen"
+      breadcrumbs={['Endometriose']}
+      label="Klachten herkennen"
+      title="Klachten en symptomen van endometriose"
+      copy="Endometriose kan verschillende klachten veroorzaken. Welke klachten iemand heeft, wanneer ze optreden en hoeveel invloed ze hebben, verschilt sterk per persoon. Klachten die je dagelijks leven beperken verdienen aandacht, ook als ze niet alleen tijdens je menstruatie optreden."
       image="/images/article-complaints-hero.png"
       primary={<Button href="/endometriosetest">Doe de Endometriosetest</Button>}
       secondary={<Button variant="white" href="/bereid-je-huisartsbezoek-voor">Bereid je huisartsbezoek voor</Button>}
     />
-    <ArticleSummary items={[
-      'Endometriose uit zich bij iedereen anders.',
-      'De hoeveelheid pijn zegt niet altijd iets over de ernst van de aandoening.',
-      'Klachten kunnen ook buiten de menstruatie voorkomen.',
-      'Alleen een arts kan beoordelen waardoor je klachten ontstaan.',
-    ]} />
-    <section className="article-section article-section--pale"><div className="article-wide article-complaint-intro"><div><h2>Herken je dit?</h2><p>Deze klachten komen regelmatig voor bij endometriose. Eén klacht zegt niet alles: klachten kunnen ook een andere oorzaak hebben.</p></div><div className="article-complaint-grid">{complaintCards.map(([title, copy, icon]) => <article key={title}><span className="symptom-icon"><img src={icon} alt="" /></span><div><h3>{title}</h3><p>{copy}</p></div></article>)}</div></div></section>
-    <section className="article-section"><div className="article-copy"><h2>Klachten verschillen per persoon</h2><p>Niet iedereen met endometriose ervaart dezelfde klachten. De ene persoon heeft vooral pijn tijdens de menstruatie, terwijl een ander dagelijks buik- of bekkenpijn heeft. Ook de intensiteit kan wisselen.</p><p>De hoeveelheid pijn komt niet altijd overeen met de hoeveelheid of uitgebreidheid van de endometriose. Iemand met weinig zichtbare endometriose kan veel pijn ervaren, terwijl iemand anders met uitgebreidere endometriose relatief weinig klachten heeft.</p><ArticleCallout>Jouw ervaring telt. Pijn of andere klachten die je dagelijks leven beperken, verdienen aandacht.</ArticleCallout></div></section>
-    <section className="article-section article-section--pale"><div className="article-flow">
-      <ComplaintDetail title="Heftige menstruatiepijn" icon="/images/symptom-menstruation.svg"><p>Buikkrampen tijdens de menstruatie komen vaak voor. Maar pijn waardoor je niet naar school of werk kunt, niet kunt slapen of nauwelijks normaal kunt functioneren, is een reden om hulp te zoeken.</p><p>De pijn kan vóór de menstruatie beginnen en tijdens of na de menstruatie doorgaan. Sommige mensen hebben daarnaast last van lage rugpijn, pijn in de benen, misselijkheid of hevig bloedverlies.</p><p><strong>Let bijvoorbeeld op:</strong></p><ul><li>je moet regelmatig thuisblijven vanwege de pijn;</li><li>gewone pijnstillers helpen onvoldoende;</li><li>de pijn wordt sterker of houdt langer aan;</li><li>je kunt dagelijkse activiteiten niet normaal uitvoeren.</li></ul></ComplaintDetail>
-      <ComplaintDetail title="Buik- of bekkenpijn" icon="/images/symptom-pelvic.svg"><p>Endometriose kan terugkerende of langdurige pijn in de onderbuik of het bekken veroorzaken. Deze pijn hoeft niet uitsluitend tijdens de menstruatie aanwezig te zijn.</p><p>De pijn kan stekend, zeurend, krampend of drukkend aanvoelen. Soms straalt de pijn uit naar de onderrug of benen. Langdurige pijn kan ook invloed hebben op slaap, concentratie, beweging en mentale gezondheid.</p></ComplaintDetail>
-      <ComplaintDetail title="Darm- en blaasklachten" icon="/images/symptom-bowel-bladder.svg"><p>Darm- en blaasklachten kunnen rond de menstruatie sterker worden, maar ook op andere momenten voorkomen.</p><p><strong>Mogelijke darmklachten zijn:</strong></p><ul><li>buikkrampen;</li><li>pijn bij de ontlasting;</li><li>diarree of verstopping;</li><li>een opgeblazen gevoel;</li><li>het gevoel dat je naar het toilet moet terwijl er niets komt.</li></ul><p><strong>Mogelijke blaasklachten zijn:</strong></p><ul><li>pijn of een branderig gevoel bij het plassen;</li><li>vaker moeten plassen;</li><li>plotselinge of loze aandrang;</li><li>pijn rond een volle blaas.</li></ul><p>Darm- en blaasklachten kunnen verschillende oorzaken hebben. Bespreek terugkerende, ernstige of onverklaarde klachten daarom met je huisarts.</p></ComplaintDetail>
-      <ComplaintDetail title="Pijn tijdens of na seks" icon="/images/symptom-sex.svg" callout="Seks hoort niet iets te zijn waar je doorheen moet vanwege de pijn."><p>Endometriose kan pijn veroorzaken tijdens of na seksuele activiteit. De pijn kan oppervlakkig zijn, maar ook dieper in de buik of het bekken worden gevoeld.</p><p>Pijn kan ervoor zorgen dat je onbewust je bekkenbodemspieren aanspant of seksuele activiteit gaat vermijden. Het is begrijpelijk als je dit lastig vindt om te bespreken, maar je hoeft je er niet voor te schamen. Je kunt deze klacht met je huisarts of behandelaar bespreken.</p></ComplaintDetail>
-      <ComplaintDetail title="Extreme vermoeidheid" icon="/images/symptom-fatigue.svg"><p>Vermoeidheid bij endometriose kan anders voelen dan gewone moeheid. Je kunt je uitgeput voelen na een kleine inspanning of onvoldoende herstellen na slaap en rust.</p><p>Vermoeidheid is niet specifiek voor endometriose en kan veel verschillende oorzaken hebben. Bespreek aanhoudende of ernstige vermoeidheid daarom met je huisarts.</p></ComplaintDetail>
-      <ComplaintDetail title="Vruchtbaarheid en kinderwens" icon="/images/symptom-fertility.svg"><p>Endometriose kan invloed hebben op de vruchtbaarheid, maar dit betekent niet dat iedereen met endometriose moeilijk zwanger wordt.</p><p>Heb je een kinderwens of lukt het niet om zwanger te worden? Bespreek dit dan met je huisarts of behandelend arts. Samen kunnen jullie bekijken of verder onderzoek nodig is.</p></ComplaintDetail>
-    </div></section>
-    <section className="article-section article-other-complaints"><div className="article-flow"><div className="article-copy"><h2>Andere mogelijke klachten</h2><p>Naast de meest voorkomende klachten kunnen mensen onder andere last hebben van:</p><ul><li>lage rugpijn;</li><li>pijn in de benen;</li><li>pijn rond de eisprong;</li><li>een gezwollen of opgeblazen buik;</li><li>slecht slapen;</li><li>problemen met concentreren;</li><li>somberheid of prikkelbaarheid;</li><li>pijn tijdens een inwendig onderzoek.</li></ul><p>Deze klachten kunnen ook een andere oorzaak hebben. Ze betekenen op zichzelf niet dat je endometriose hebt.</p></div><MedicalReview inverse /></div></section>
-    <section className="article-section"><div className="article-copy article-cta"><h2>Klachten kunnen veranderen</h2><p>Klachten kunnen in de loop van de tijd veranderen. Ze kunnen sterker of vaker worden, maar ook tijdelijk verminderen. Sommige mensen hebben eerst alleen pijn tijdens de menstruatie en krijgen later ook klachten op andere momenten.</p><p>Het kan helpen om gedurende enkele weken of menstruatiecycli bij te houden:</p><ul><li>welke klachten je hebt;</li><li>wanneer ze optreden;</li><li>hoe hevig ze zijn;</li><li>hoelang ze duren;</li><li>wat de invloed is op je dagelijks leven;</li><li>welke medicijnen je gebruikt en of die helpen.</li></ul><Button><img src="/images/download-white.svg" alt="" />Download het klachtendagboek</Button></div></section>
-    <section className="article-section article-section--pale"><div className="article-copy article-cta"><h2>Wanneer ga je naar de huisarts?</h2><p>Maak een afspraak wanneer klachten terugkeren, erger worden of je dagelijks leven beïnvloeden. Denk bijvoorbeeld aan pijn waardoor je niet naar school, werk of sport kunt, pijnstillers die onvoldoende helpen of buikpijn die ook buiten de menstruatie blijft bestaan.</p><p>Je hoeft niet eerst zeker te weten dat het endometriose is. De huisarts kan met je bespreken waardoor de klachten mogelijk ontstaan en welke vervolgstappen passend zijn.</p><Button href="/bereid-je-huisartsbezoek-voor">Bereid je huisartsbezoek voor<img src="/images/arrow-white.svg" alt="" /></Button></div></section>
-    <section className="article-section"><div className="article-copy article-cta"><h2>Wat kun je nu doen?</h2><p>Herken je meerdere klachten of hebben ze invloed op je dagelijks leven? Doe de test of bereid een gesprek met je huisarts voor.</p><div className="article-actions"><Button href="/endometriosetest">Doe de Endometriosetest</Button><Button variant="magenta-outline">Stel je vraag aan een ervaringsdeskundige</Button></div></div></section>
+    <section className="article-section">
+      <ArticleTocLayout sections={complaintsSections}>
+        <TocSummaryCard id="in-het-kort-klachten" items={[
+          'Endometriose uit zich bij iedereen anders.',
+          'Klachten kunnen rond de menstruatie én op andere momenten voorkomen.',
+          'Veel pijn betekent niet automatisch dat er veel endometriose aanwezig is.',
+          'Weinig zichtbare endometriose kan toch ernstige klachten veroorzaken.',
+          'Sommige mensen met endometriose hebben weinig of geen klachten.',
+          'Alleen een zorgprofessional kan onderzoeken wat de oorzaak van je klachten is.',
+        ]} />
+
+        <ArticleTocSection id="herken-je-dit" heading="Herken je dit?">
+          <p>Deze klachten kunnen voorkomen bij endometriose. Eén klacht zegt niet alles. Ook hoef je niet alle klachten te hebben om endometriose te kunnen hebben.</p>
+          <div className="article-toc-complaint-grid">{complaintCards.map(([title, copy, Icon]) => <article key={title}><span className="symptom-icon"><Icon /></span><div><h3>{title}</h3><p>{copy}</p></div></article>)}</div>
+        </ArticleTocSection>
+
+        <ArticleTocSection id="klachten-verschillen" heading="Klachten verschillen per persoon">
+          <p>Niet iedereen met endometriose heeft dezelfde klachten. De ene persoon heeft vooral pijn tijdens de menstruatie. Een ander heeft dagelijks buikpijn, darmklachten of extreme vermoeidheid. Sommige mensen hebben weinig of geen merkbare klachten.</p>
+          <p>Klachten kunnen ook in de loop van de tijd veranderen. Je kunt maanden hebben met relatief weinig klachten en periodes waarin de klachten veel invloed hebben.</p>
+          <p>De ernst van de pijn komt niet altijd overeen met de hoeveelheid endometriose die tijdens onderzoek zichtbaar is. Iemand met weinig zichtbare endometriose kan ernstige pijn hebben. Andersom kan uitgebreide endometriose soms weinig klachten geven.</p>
+          <p>Ook de plek waar je pijn voelt, vertelt niet altijd precies waar endometriose aanwezig is. Pijn kan uitstralen en ook spieren, zenuwen en de bekkenbodem kunnen bij langdurige klachten gevoeliger worden.</p>
+          <ArticleCallout><p>Jouw ervaring telt. Pijn of andere klachten die je dagelijks leven beperken verdienen aandacht, ongeacht wat er op dat moment wel of niet zichtbaar is tijdens onderzoek.</p></ArticleCallout>
+        </ArticleTocSection>
+
+        <ArticleTocSection id="heftige-menstruatiepijn" heading="Heftige menstruatiepijn" icon={<DropletIcon />}>
+          <p>Buikkrampen tijdens de menstruatie komen vaak voor. Maar pijn waardoor gewone dagelijkse activiteiten niet lukken, moet niet als vanzelfsprekend worden beschouwd.</p>
+          <p>Bij endometriose kan pijn optreden:</p>
+          <ul><li>in de dagen vóór de menstruatie;</li><li>tijdens de menstruatie;</li><li>in de dagen erna;</li><li>rond de eisprong;</li><li>op andere momenten in de cyclus.</li></ul>
+          <p>De pijn kan krampend, stekend, brandend, drukkend of zeurend aanvoelen. De pijn kan in de onderbuik zitten en uitstralen naar de onderrug, liezen of benen.</p>
+          <p>Let bijvoorbeeld op wanneer je door de pijn:</p>
+          <ul><li>niet naar school, studie of werk kunt;</li><li>niet kunt slapen;</li><li>sociale afspraken moet afzeggen;</li><li>niet kunt sporten of bewegen;</li><li>bijna flauwvalt, moet overgeven of volledig uitgeput raakt;</li><li>regelmatig meer pijnstilling nodig hebt;</li><li>je dagelijkse activiteiten rond je menstruatie moet plannen.</li></ul>
+          <p>Hevig of langdurig bloedverlies kan ook voorkomen, maar kan verschillende oorzaken hebben. Adenomyose, vleesbomen en andere aandoeningen kunnen bijvoorbeeld eveneens hevig bloedverlies veroorzaken.</p>
+        </ArticleTocSection>
+
+        <ArticleTocSection id="buik-bekkenpijn" heading="Buik- of bekkenpijn" icon={<PersonStandingIcon />}>
+          <p>Endometriose kan terugkerende of langdurige pijn in de buik of het bekken veroorzaken. Deze pijn kan tijdens de menstruatie erger worden, maar ook buiten de menstruatie aanwezig zijn.</p>
+          <p>De pijn kan worden gevoeld:</p>
+          <ul><li>onder in de buik;</li><li>diep in het bekken;</li><li>aan één of beide kanten;</li><li>in de onderrug;</li><li>in de liezen;</li><li>in de heupen of bovenbenen.</li></ul>
+          <p>Sommige mensen hebben pijn bij bewegen, sporten, lang zitten of staan. Anderen ervaren een zwaar, drukkend of gespannen gevoel in de onderbuik.</p>
+          <p>Buik- en bekkenpijn kan veel verschillende oorzaken hebben. De plaats van de pijn is daarom niet voldoende om endometriose vast te stellen.</p>
+          <ArticleCallout><p>Pijn hoeft niet constant aanwezig te zijn om belangrijk te zijn. Ook terugkerende pijn die iedere maand je leven beïnvloedt is een reden om hulp te zoeken.</p></ArticleCallout>
+        </ArticleTocSection>
+
+        <ArticleTocSection id="darm-blaasklachten" heading="Darm- en blaasklachten" icon={<ToiletIcon />}>
+          <p>Endometriose kan samengaan met klachten rond de ontlasting of het plassen. Deze klachten kunnen tijdens de menstruatie duidelijker worden, maar soms ook op andere momenten voorkomen.</p>
+          <p><strong>Mogelijke darmklachten</strong></p>
+          <ul><li>pijn of krampen bij de ontlasting;</li><li>diarree;</li><li>verstopping;</li><li>afwisseling tussen diarree en verstopping;</li><li>een opgeblazen buik;</li><li>misselijkheid;</li><li>druk of pijn rond de endeldarm;</li><li>het gevoel dat de darm niet helemaal leeg is.</li></ul>
+          <p><strong>Mogelijke blaasklachten</strong></p>
+          <ul><li>pijn of een branderig gevoel bij het plassen;</li><li>vaak moeten plassen;</li><li>plotseling sterke aandrang;</li><li>pijn wanneer de blaas vol is;</li><li>moeite om de blaas helemaal leeg te plassen;</li><li>buik- of bekkenpijn na het plassen.</li></ul>
+          <p>Darm- en blaasklachten kunnen ook andere oorzaken hebben. Het is daarom belangrijk om ze met een arts te bespreken en niet zelf aan te nemen dat ze door endometriose worden veroorzaakt.</p>
+          <ArticleCallout><p>Vertel het altijd aan een arts wanneer je bloed bij de ontlasting of in de urine ziet.</p></ArticleCallout>
+        </ArticleTocSection>
+
+        <ArticleTocSection id="pijn-seks" heading="Pijn tijdens of na seks" icon={<HeartIcon />}>
+          <p>Pijn tijdens of na seks komt regelmatig voor bij mensen met endometriose. De pijn kan oppervlakkig bij de ingang van de vagina worden gevoeld, maar ook dieper in de buik of het bekken.</p>
+          <p>De pijn kan:</p>
+          <ul><li>tijdens penetratie ontstaan;</li><li>vooral bij diepe penetratie optreden;</li><li>pas na de seksuele activiteit beginnen;</li><li>nog uren of langer aanhouden;</li><li>samengaan met buikpijn, krampen of bloedverlies.</li></ul>
+          <p>Uit angst voor pijn kun je onbewust je bekkenbodemspieren aanspannen. Dit kan de pijn verder versterken. Ook vermoeidheid, eerdere pijnervaringen en spanning kunnen invloed hebben.</p>
+          <p>Seks hoort niet iets te zijn waar je doorheen moet omdat je denkt dat de pijn erbij hoort. Stop wanneer iets pijn doet en bespreek samen wat wel prettig of mogelijk is.</p>
+          <ArticleCallout><p>Vind je het moeilijk om deze klachten te bespreken? Een huisarts of gynaecoloog is gewend om vragen over seks en pijn te bespreken. Wanneer dat passend is, kan ook begeleiding door een bekkenfysiotherapeut of seksuoloog worden overwogen.</p></ArticleCallout>
+        </ArticleTocSection>
+
+        <ArticleTocSection id="extreme-vermoeidheid" heading="Extreme vermoeidheid" icon={<BedDoubleIcon />}>
+          <p>Vermoeidheid bij endometriose kan verder gaan dan gewone moeheid na een drukke dag. Het kan voelen alsof je lichaam volledig leeg is, ook wanneer je voldoende hebt geslapen.</p>
+          <p>Vermoeidheid kan mogelijk samenhangen met:</p>
+          <ul><li>langdurige of terugkerende pijn;</li><li>slecht slapen door klachten;</li><li>de lichamelijke belasting van ontstekingsprocessen;</li><li>hevig bloedverlies en ijzertekort;</li><li>bijwerkingen van medicijnen;</li><li>steeds moeten plannen en omgaan met klachten;</li><li>mentale spanning of somberheid.</li></ul>
+          <p>Vermoeidheid kan het moeilijk maken om te werken, studeren, bewegen, sociale activiteiten te ondernemen of voor jezelf en anderen te zorgen.</p>
+          <p>Vermoeidheid heeft veel mogelijke oorzaken. Bespreek aanhoudende of extreme vermoeidheid daarom met je huisarts. De arts kan beoordelen of aanvullend onderzoek nodig is, bijvoorbeeld naar bloedarmoede of een andere aandoening.</p>
+          <ArticleCallout><p>Extreme vermoeidheid is niet hetzelfde als luiheid. Ook wanneer anderen niet aan je zien hoe uitgeput je bent, kan de invloed op je leven groot zijn.</p></ArticleCallout>
+        </ArticleTocSection>
+
+        <ArticleTocSection id="vruchtbaarheid" heading="Vruchtbaarheidsproblemen" icon={<SproutIcon />}>
+          <p>Endometriose kan bij sommige mensen invloed hebben op de vruchtbaarheid. Soms wordt endometriose ontdekt tijdens onderzoek omdat zwanger worden niet lukt.</p>
+          <p>Endometriose betekent niet automatisch dat je niet zwanger kunt worden. Veel mensen met endometriose worden zonder medische hulp zwanger. Bij anderen kan het langer duren of kan aanvullende begeleiding nodig zijn.</p>
+          <p>De invloed op vruchtbaarheid verschilt onder andere door:</p>
+          <ul><li>de plaats en uitgebreidheid van de endometriose;</li><li>de aanwezigheid van verklevingen;</li><li>endometriosecysten op de eierstokken;</li><li>leeftijd;</li><li>andere medische factoren bij jezelf of je partner.</li></ul>
+          <p>Heb je een huidige of toekomstige kinderwens? Bespreek dit dan met je arts voordat je een behandeling kiest. Sommige behandelingen onderdrukken tijdelijk de menstruatie en bepaalde operaties kunnen relevant zijn voor je vruchtbaarheid.</p>
+          <p>Maak je je zorgen omdat zwanger worden niet lukt? Bespreek dan met je huisarts wanneer verder onderzoek in jouw situatie passend is.</p>
+        </ArticleTocSection>
+
+        <ArticleTocSection id="andere-klachten" heading="Andere mogelijke klachten">
+          <p>Naast de zes belangrijkste klachtengroepen kunnen ook andere klachten voorkomen, zoals:</p>
+          <ul><li>pijn in de onderrug;</li><li>pijn die uitstraalt naar de benen;</li><li>pijn rond de eisprong;</li><li>een sterk opgeblazen buik;</li><li>misselijkheid;</li><li>slaapproblemen;</li><li>moeite met concentreren;</li><li>hoofdpijn;</li><li>prikkelbaarheid, angst of somberheid.</li></ul>
+          <p>In zeldzame gevallen kan endometriose buiten het bekken voorkomen. Dit kan bijvoorbeeld samengaan met terugkerende klachten rond de schouder of borstkas die een patroon met de menstruatie lijken te volgen.</p>
+          <p>Geen van deze klachten bewijst op zichzelf dat je endometriose hebt. De klachten kunnen ook bij andere aandoeningen voorkomen.</p>
+        </ArticleTocSection>
+
+        <ArticleTocSection id="klachten-veranderen" heading="Klachten kunnen veranderen">
+          <p>Klachten kunnen per maand en per levensfase verschillen. Ze kunnen veranderen door bijvoorbeeld:</p>
+          <ul><li>hormonale schommelingen;</li><li>gebruik of verandering van anticonceptie;</li><li>zwangerschap;</li><li>een behandeling;</li><li>stress en slaap;</li><li>veranderingen in lichamelijke belasting;</li><li>de overgang.</li></ul>
+          <p>Ook na een behandeling kunnen klachten blijven bestaan of later terugkomen. Bespreek duidelijke veranderingen met je behandelaar, vooral wanneer klachten toenemen of nieuwe klachten ontstaan.</p>
+          <h3>Houd je klachten bij</h3>
+          <p>Een klachtenoverzicht helpt je om patronen te herkennen en duidelijker uit te leggen wat je ervaart. Je kunt hiervoor een dagboek, agenda of notitie op je telefoon gebruiken.</p>
+          <p>Noteer bijvoorbeeld:</p>
+          <ul><li>de datum en het moment van de dag;</li><li>waar je je in je menstruatiecyclus bevindt;</li><li>welke klacht je hebt;</li><li>waar je de klacht voelt;</li><li>hoe de klacht aanvoelt;</li><li>hoe ernstig de klacht is op een schaal van 0 tot 10;</li><li>hoelang de klacht duurt;</li><li>welke invloed de klacht heeft op je activiteiten;</li><li>welke medicijnen of andere oplossingen je gebruikt;</li><li>of die oplossingen helpen;</li><li>eventuele darm-, blaas- of seksuele klachten.</li></ul>
+          <p>Houd bij wat haalbaar is. Je hoeft niet maandenlang alles perfect te registreren voordat je hulp mag vragen.</p>
+          <h3>Breng je klachten in kaart</h3>
+          <p>Gebruik het klachtendagboek om bij te houden wanneer klachten optreden en wat ze met je dagelijks leven doen.</p>
+          <Button><img src="/images/download-white.svg" alt="" />Download het klachtendagboek</Button>
+        </ArticleTocSection>
+
+        <ArticleTocSection id="wanneer-huisarts" heading="Wanneer ga je naar de huisarts?">
+          <p>Maak een afspraak met je huisarts wanneer klachten regelmatig terugkomen, erger worden of je dagelijks leven beïnvloeden.</p>
+          <p>Ga bijvoorbeeld naar de huisarts wanneer:</p>
+          <ul><li>menstruatiepijn je belemmert in school, studie, werk of slaap;</li><li>je door klachten activiteiten of afspraken moet afzeggen;</li><li>je ook buiten de menstruatie buik- of bekkenpijn hebt;</li><li>je regelmatig pijn hebt bij de ontlasting of het plassen;</li><li>je pijn hebt tijdens of na seks;</li><li>je langdurig of extreem vermoeid bent;</li><li>je veel of langdurig bloed verliest;</li><li>je vragen of zorgen hebt over vruchtbaarheid;</li><li>je jezelf herkent in meerdere klachten van endometriose;</li><li>je je zorgen maakt, ook als je klachten niet in een lijst passen.</li></ul>
+          <p>De huisarts kan met je bespreken welke oorzaken mogelijk zijn, of verder onderzoek nodig is en welke vervolgstap passend kan zijn.</p>
+        </ArticleTocSection>
+
+        <ArticleTocSection id="wat-nu" heading="Wat kun je doen?">
+          <ArticleCallout><p>Neem bij plotselinge hevige klachten of wanneer je je ernstig ziek voelt direct contact op met je huisarts of huisartsenpost.</p></ArticleCallout>
+          <Button variant="magenta-outline" href="/bereid-je-huisartsbezoek-voor">Bereid je huisartsbezoek voor</Button>
+        </ArticleTocSection>
+
+        <MedicalReview date="[datum invullen]" reviewer="[naam en functie invullen]" note="Deze informatie is algemeen en vervangt geen persoonlijk medisch advies. Klachten kunnen verschillende oorzaken hebben. Bespreek vragen of zorgen over je gezondheid met je huisarts of behandelaar." />
+        <ArticleShare />
+      </ArticleTocLayout>
+    </section>
     <RelatedArticles cards={complaintsRelated} />
   </main><Footer /></>;
 }
 
 const doctorVisitRelated: RelatedArticle[] = [
-  { title: 'Klachten', copy: 'Lees welke klachten bij endometriose kunnen voorkomen.', image: '/images/related-complaints.png', href: '/klachten' },
-  { title: 'Adenomyose', copy: 'Lees wat adenomyose is en hoe het verschilt van endometriose.', image: '/images/related-adenomyosis.png', href: '#' },
-  { title: 'Wat is endometriose?', copy: 'Lees wat endometriose is en welke invloed de aandoening kan hebben.', image: '/images/article-endometriosis-hero.jpg', href: '/wat-is-endometriose' },
+  { title: 'Klachten en symptomen', copy: 'Lees welke klachten bij endometriose kunnen voorkomen en welke informatie belangrijk kan zijn voor je huisarts.', image: '/images/related-complaints.png', href: '/klachten' },
+  { title: 'Onderzoek en diagnose', copy: 'Lees wat je kunt verwachten van een verwijzing, gesprekken en mogelijke onderzoeken.', image: '/images/related-diagnosis.png', href: '#' },
+  { title: 'Doe de Endometriosetest', copy: 'Beantwoord acht korte vragen en ontvang een advies over een mogelijke vervolgstap.', image: '/images/image-1.jpg', href: '/endometriosetest', cta: 'Doe de test' },
 ];
 
 function DoctorStep({ number, title, children }: { number: 1 | 2 | 3; title: string; children: React.ReactNode }) {
   return <article className="doctor-step"><img src={`/images/doctor-step-${number}.svg`} alt={`Stap ${number}`} /><div><h3>{title}</h3>{children}</div></article>;
 }
 
+const doctorVisitSections: TocSectionDef[] = [
+  { id: 'in-het-kort-huisarts', navLabel: 'In het kort' },
+  { id: 'bereid-je-voor', navLabel: 'Drie stappen' },
+  { id: 'vragenlijst', navLabel: 'De vragenlijst' },
+  { id: 'neem-iemand-mee', navLabel: 'Iemand meenemen' },
+  { id: 'tijdens-gesprek', navLabel: 'Tijdens het gesprek' },
+  { id: 'stel-vragen', navLabel: 'Stel je vragen' },
+  { id: 'maak-plan', navLabel: 'Maak een plan' },
+  { id: 'na-afspraak', navLabel: 'Na de afspraak' },
+];
+
 function DoctorVisitPage() {
   return <><Header /><main className="article-page doctor-page" id="top">
     <ArticleHero
       current="Bereid je huisartsbezoek voor"
-      breadcrumbs={['Hulp & Zorg', 'Klachten en diagnose']}
+      breadcrumbs={['Zorg']}
       title="Ga voorbereid naar je huisarts"
-      copy={<><p>Heb je klachten die mogelijk bij endometriose passen? Een goede voorbereiding helpt je om duidelijk te vertellen wat je ervaart en welke invloed dit op je dagelijks leven heeft.</p><p>Op deze pagina lees je wat je vooraf kunt bijhouden, wat je kunt meenemen en welke vragen je aan de huisarts kunt stellen.</p></>}
+      copy="Heb je klachten die mogelijk bij endometriose of adenomyose passen? Een goede voorbereiding helpt je om duidelijk te vertellen wat je ervaart, alle vragen te stellen die je hebt en samen met je huisarts een concrete vervolgstap af te spreken. Je hoeft tijdens het gesprek niet alles uit je hoofd te weten. Schrijf je klachten en vragen vooraf op en neem gerust iemand mee."
       image="/images/doctor-visit-hero.png"
       primary={<Button href="/downloads/vragenlijst-huisartsbezoek.pdf" download="vragenlijst-huisartsbezoek.pdf">Download de gesprekshulp</Button>}
-      secondary={<Button variant="white" href="#voorbereiden">Zo bereid je je voor</Button>}
+      secondary={<Button variant="white" href="#bereid-je-voor">Zo bereid je je voor</Button>}
     />
-    <section className="article-section doctor-summary"><div className="doctor-summary-inner">
-      <div className="article-summary-inner"><img src="/images/article-summary.svg" alt="" /><div><h2>In het kort</h2><ul><li>Houd bij wanneer je klachten optreden.</li><li>Beschrijf wat de klachten met je dagelijks leven doen.</li><li>Noteer welke medicijnen of oplossingen je hebt geprobeerd.</li><li>Bedenk wat je tijdens de afspraak wilt vragen.</li><li>Neem je aantekeningen mee op papier of op je telefoon.</li></ul></div></div>
-      <ArticleCallout>Wacht niet met het maken van een afspraak totdat je alles hebt bijgehouden. Ook zonder volledig overzicht kun je naar je huisarts.</ArticleCallout>
-    </div></section>
-    <section className="article-section article-section--pale" id="voorbereiden"><div className="doctor-steps article-wide">
-      <div className="doctor-section-heading"><h2>Bereid je gesprek in 3 stappen voor</h2><p>Je hoeft geen uitgebreid medisch verslag te maken. Korte en concrete aantekeningen kunnen de huisarts al helpen om je klachten beter te begrijpen.</p></div>
-      <div className="doctor-step-list">
-        <DoctorStep number={1} title="Houd je klachten bij"><p>Schrijf gedurende een aantal dagen of weken op wanneer je klachten optreden. Noteer ook of je op dat moment ongesteld bent.</p><p>Schrijf per moment kort op:</p><ul><li>welke klacht je hebt;</li><li>waar je de klacht voelt;</li><li>hoe ernstig de klacht is op een schaal van 0 tot 10;</li><li>hoe lang de klacht duurt;</li><li>wat je hierdoor niet of moeilijk kunt doen.</li></ul></DoctorStep>
-        <DoctorStep number={2} title="Noteer wat de klachten met je leven doen"><p>Vertel niet alleen hoeveel pijn je hebt. Het is ook belangrijk om te beschrijven welke invloed de klachten op je dagelijks leven hebben.</p><p>Denk bijvoorbeeld aan:</p><ul><li>school, studie of werk missen;</li><li>activiteiten moeten afzeggen;</li><li>slecht slapen;</li><li>moeite hebben met bewegen;</li><li>pijn bij het plassen of de ontlasting;</li><li>pijn tijdens of na seks;</li><li>vermoeidheid of concentratieproblemen.</li></ul></DoctorStep>
-        <DoctorStep number={3} title="Schrijf op wat je al hebt geprobeerd"><p>Noteer welke medicijnen, anticonceptie of andere oplossingen je gebruikt of hebt geprobeerd.</p><p>Schrijf daarbij op:</p><ul><li>wat je hebt gebruikt;</li><li>of het voldoende hielp;</li><li>of je bijwerkingen kreeg;</li><li>waarom je eventueel bent gestopt.</li></ul><p>Denk bijvoorbeeld aan pijnstillers, hormonale anticonceptie, warmte, rust of fysiotherapie. Verander het gebruik van medicijnen niet zonder overleg met je huisarts of apotheker.</p></DoctorStep>
-      </div>
-    </div></section>
-    <section className="article-section doctor-download" id="vragenlijst"><div className="article-copy article-cta"><h2>Vul de vragenlijst vooraf in</h2><p>De Endometriose Stichting heeft een uitgebreide vragenlijst gemaakt om je te helpen bij de voorbereiding op je afspraak. De vragen gaan onder andere over je menstruatie, pijn, darm- en blaasklachten, medicijnen en de invloed van je klachten op je leven.</p><p>Vul in wat voor jou relevant is. Je hoeft niet op iedere vraag direct een antwoord te weten. Neem de ingevulde vragenlijst mee op papier of op je telefoon.</p><Button variant="white" href="/downloads/vragenlijst-huisartsbezoek.pdf" download="vragenlijst-huisartsbezoek.pdf">Download de vragenlijst</Button></div></section>
-    <section className="article-section doctor-guidance"><div className="article-flow">
-      <div className="article-copy"><h2>Neem iemand mee die je vertrouwt</h2><p>Een afspraak kan spannend of overweldigend zijn. Je mag daarom iemand meenemen, bijvoorbeeld je partner, een familielid, vriend of vriendin.</p><p>Die persoon kan:</p><ul><li>je helpen om je verhaal te vertellen;</li><li>meeluisteren en aantekeningen maken;</li><li>vragen stellen die je zelf vergeet;</li><li>je ondersteunen als je gespannen raakt;</li><li>na afloop samen met jou de afspraken doornemen.</li></ul><p>Bespreek vooraf wat je graag zelf wilt vertellen en waarbij de ander je kan helpen.</p><ArticleCallout>Vraag degene die met je meegaat om de gemaakte afspraken op te schrijven. Zo hoef jij tijdens het gesprek niet alles tegelijk te onthouden.</ArticleCallout></div>
-      <div className="article-copy"><h2>Vertel wat de klachten met je leven doen</h2><p>Je hoeft geen medische termen te gebruiken en je hoeft zelf geen diagnose te stellen. Vertel zo concreet mogelijk wat je ervaart, hoe vaak dit gebeurt en wat je door de klachten niet of moeilijk kunt doen.</p><p>Vertel ook wanneer je klachten niet alleen tijdens je menstruatie optreden. Benoem wat je al hebt geprobeerd en of dat voldoende heeft geholpen.</p></div>
-      <div className="article-copy"><h2>Stel alle vragen die je hebt</h2><p>Jouw vragen zijn een belangrijk onderdeel van de afspraak. Schrijf ze vooraf op en neem de lijst mee. Er zijn geen verkeerde of onbelangrijke vragen.</p><p>Je kunt bijvoorbeeld vragen:</p><ul><li>Kunnen mijn klachten bij endometriose passen?</li><li>Welke andere oorzaken kunnen mijn klachten hebben?</li><li>Is onderzoek nodig?</li><li>Welke behandelingen of pijnbestrijding kunnen we proberen?</li><li>Wat zijn de mogelijke voordelen en nadelen daarvan?</li><li>Wanneer kan ik verbetering verwachten?</li><li>Wat doen we als deze aanpak onvoldoende helpt?</li><li>Wanneer is een verwijzing naar een gynaecoloog passend?</li><li>Bij welke veranderingen moet ik opnieuw contact opnemen?</li><li>Wanneer bespreken we hoe het gaat?</li></ul><p>Heb je veel vragen? Vertel dit aan het begin van de afspraak. Als niet alles besproken kan worden, vraag dan om een vervolgafspraak voor de vragen die nog openstaan.</p><ArticleCallout>Je mag altijd om uitleg vragen. Bijvoorbeeld: “Kunt u dat in eenvoudigere woorden uitleggen?” of “Waarom adviseert u deze stap?”</ArticleCallout></div>
-      <div className="article-copy"><h2>Zorg dat je weet wat de volgende stap is</h2><p>Aan het einde van de afspraak hoort duidelijk te zijn wat jullie hebben besproken en hoe het verdergaat. Neem samen de gemaakte afspraken door en schrijf ze op.</p><p>Controleer voordat je vertrekt of je weet:</p><ul><li>wat de huisarts denkt dat er mogelijk aan de hand is;</li><li>of er onderzoek of een behandeling wordt voorgesteld;</li><li>wat je zelf kunt doen;</li><li>wanneer jullie het resultaat evalueren;</li><li>wanneer je opnieuw contact moet opnemen;</li><li>wat er gebeurt als je klachten niet verminderen;</li><li>of en wanneer een verwijzing wordt overwogen.</li></ul></div>
-      <div className="article-copy"><h2>Bespreek samen wat er is afgesproken</h2><p>Neem na de afspraak rustig je aantekeningen door, bij voorkeur samen met degene die met je mee was. Schrijf vragen die later opkomen meteen op.</p><p>Is iets onduidelijk, veranderen je klachten of helpt de afgesproken aanpak onvoldoende? Neem dan opnieuw contact op met de huisartsenpraktijk.</p><ArticleCallout>Blijf benoemen welke invloed de klachten op je dagelijks leven hebben. Klachten die je structureel beperken, verdienen aandacht.</ArticleCallout></div>
-    </div></section>
+    <section className="article-section">
+      <ArticleTocLayout sections={doctorVisitSections}>
+        <TocSummaryCard id="in-het-kort-huisarts" items={[
+          'Wacht niet met het maken van een afspraak totdat je alles perfect hebt bijgehouden. Ook zonder een volledig overzicht kun je met je klachten naar de huisarts.',
+          'Houd vóór de afspraak bij wanneer je klachten optreden.',
+          'Beschrijf niet alleen de klacht, maar ook wat deze met je dagelijks leven doet.',
+          'Schrijf alle vragen op die je wilt stellen.',
+          'Neem iemand mee als dat jou helpt om je verhaal te vertellen en informatie te onthouden.',
+          'Vraag aan het einde wat de volgende stap is en wanneer deze wordt geëvalueerd.',
+        ]} />
+
+        <ArticleTocSection id="bereid-je-voor" heading="Bereid je gesprek in drie stappen voor">
+          <p>Je hoeft geen uitgebreid medisch verslag te maken. Korte en concrete aantekeningen kunnen je huisarts al helpen om een beter beeld te krijgen.</p>
+          <div className="doctor-step-list">
+            <DoctorStep number={1} title="Houd je klachten bij">
+              <p>Schrijf gedurende een aantal dagen of weken op wanneer je klachten optreden. Noteer ook of de klachten op dat moment samenhangen met je menstruatie.</p>
+              <p>Schrijf bijvoorbeeld op:</p>
+              <ul><li>welke klacht je hebt;</li><li>wanneer de klacht begint;</li><li>hoe lang de klacht duurt;</li><li>hoe ernstig de klacht is op een schaal van 0 tot 10;</li><li>waar in je lichaam je de klacht voelt;</li><li>wat je op dat moment niet of moeilijk kunt doen;</li><li>wat de klacht vermindert of juist erger maakt.</li></ul>
+              <p>Je hoeft niet te wachten totdat je meerdere menstruatiecycli hebt bijgehouden. Maak eerder een afspraak als je klachten ernstig zijn of je dagelijks leven beperken.</p>
+            </DoctorStep>
+            <DoctorStep number={2} title="Beschrijf wat de klachten met je leven doen">
+              <p>Vertel niet alleen hoeveel pijn je hebt, maar ook welke invloed de klachten hebben.</p>
+              <p>Denk bijvoorbeeld aan:</p>
+              <ul><li>niet naar school, studie of werk kunnen;</li><li>afspraken of activiteiten moeten afzeggen;</li><li>slecht slapen;</li><li>niet kunnen sporten of bewegen;</li><li>pijn bij het plassen of de ontlasting;</li><li>pijn tijdens of na seks;</li><li>extreme vermoeidheid;</li><li>moeite met concentreren;</li><li>zorgen, spanning of somberheid door de klachten.</li></ul>
+              <p>Concrete voorbeelden helpen de huisarts om de ernst van de situatie beter te begrijpen.</p>
+            </DoctorStep>
+            <DoctorStep number={3} title="Noteer wat je al hebt geprobeerd">
+              <p>Schrijf op welke medicijnen, anticonceptie of andere oplossingen je gebruikt of eerder hebt geprobeerd.</p>
+              <p>Noteer wanneer mogelijk:</p>
+              <ul><li>de naam van het middel;</li><li>hoeveel en hoe vaak je het gebruikt;</li><li>of het hielp;</li><li>welke bijwerkingen je merkte;</li><li>waarom je ermee bent gestopt.</li></ul>
+              <p>Denk ook aan andere dingen die je hebt geprobeerd, zoals warmte, rust, beweging, fysiotherapie of veranderingen in je dagelijkse activiteiten.</p>
+              <p>Verander het gebruik van medicijnen niet zonder overleg met een arts of apotheker.</p>
+            </DoctorStep>
+          </div>
+        </ArticleTocSection>
+
+        <ArticleTocSection id="vragenlijst" heading="Vul de vragenlijst vooraf in">
+          <p>De Endometriose Stichting heeft een vragenlijst gemaakt om je te helpen je klachten en medische voorgeschiedenis op een rij te zetten.</p>
+          <p>In de vragenlijst komen onderwerpen aan bod zoals:</p>
+          <ul><li>je menstruatie;</li><li>buik- en bekkenpijn;</li><li>darm- en blaasklachten;</li><li>pijn tijdens of na seks;</li><li>vermoeidheid;</li><li>eerdere onderzoeken;</li><li>gebruikte medicijnen en anticonceptie;</li><li>eventuele kinderwens;</li><li>de invloed van klachten op je dagelijks leven.</li></ul>
+          <p>Je hoeft niet op iedere vraag meteen een antwoord te weten. Vul in wat voor jou van toepassing is en neem de vragenlijst mee op papier of op je telefoon.</p>
+          <p>De vragenlijst kan helpen bij een afspraak met de huisarts én bij een eventuele latere afspraak met een gynaecoloog.</p>
+          <h3>Wat neem je mee?</h3>
+          <p>Je hoeft geen groot dossier samen te stellen. Neem mee wat jou helpt om je verhaal duidelijk te vertellen.</p>
+          <p>Denk aan:</p>
+          <ul><li>de ingevulde vragenlijst;</li><li>je klachtenoverzicht of klachtendagboek;</li><li>een lijst met medicijnen en anticonceptie;</li><li>je belangrijkste vragen;</li><li>relevante informatie over eerdere onderzoeken of behandelingen;</li><li>eventueel iemand die je vertrouwt.</li></ul>
+          <p>Heb je veel klachten of vragen? Vraag bij het maken van de afspraak of er extra tijd mogelijk is.</p>
+          <Button href="/downloads/vragenlijst-huisartsbezoek.pdf" download="vragenlijst-huisartsbezoek.pdf">Download de vragenlijst</Button>
+        </ArticleTocSection>
+
+        <ArticleTocSection id="neem-iemand-mee" heading="Neem iemand mee die je vertrouwt">
+          <p>Een afspraak kan spannend zijn. Daardoor is het soms moeilijk om alles te vertellen of te onthouden. Je mag daarom iemand meenemen, bijvoorbeeld je partner, een familielid of een vriend.</p>
+          <p>Bespreek vooraf wat je van die persoon nodig hebt. Diegene kan bijvoorbeeld:</p>
+          <ul><li>je helpen je verhaal te vertellen;</li><li>belangrijke aanvullingen geven;</li><li>meeluisteren;</li><li>vragen stellen die je zelf vergeet;</li><li>aantekeningen maken;</li><li>na afloop met jou bespreken wat er is afgesproken.</li></ul>
+          <p>Jij bepaalt wat er tijdens de afspraak wordt besproken. Spreek daarom vooraf af dat de ander jou ondersteunt en niet het gesprek van je overneemt.</p>
+          <ArticleCallout><p>Vraag degene die met je meegaat om de afspraken en vervolgstappen op te schrijven. Dan hoef jij tijdens het gesprek niet alles tegelijk te onthouden.</p></ArticleCallout>
+        </ArticleTocSection>
+
+        <ArticleTocSection id="tijdens-gesprek" heading="Vertel duidelijk wat je ervaart">
+          <p>Begin het gesprek met de klachten die voor jou het belangrijkst zijn. Je hoeft je verhaal niet in medische woorden te vertellen.</p>
+          <p>Je kunt bijvoorbeeld zeggen:</p>
+          <p>"Ik heb al langere tijd pijn en andere klachten rond mijn menstruatie. Hierdoor kan ik regelmatig niet werken, studeren of normaal deelnemen aan activiteiten. Ik wil graag onderzoeken waar deze klachten vandaan komen en wat eraan gedaan kan worden."</p>
+          <p>Vertel vervolgens:</p>
+          <ul><li>wanneer de klachten zijn begonnen;</li><li>waar je last van hebt;</li><li>wanneer de klachten optreden;</li><li>hoe vaak en hoe ernstig ze zijn;</li><li>of ze tijdens je menstruatie erger worden;</li><li>wat de invloed is op je dagelijks leven;</li><li>wat je al hebt geprobeerd;</li><li>waar je je zorgen over maakt.</li></ul>
+          <p>Vertel ook over klachten die misschien moeilijk zijn om te bespreken, zoals pijn tijdens seks, darmklachten, blaasklachten of mentale belasting. Deze informatie kan belangrijk zijn voor het totaalbeeld.</p>
+          <p><strong>Bagatelliseer je klachten niet.</strong> Zeg niet automatisch dat het "wel meevalt" wanneer de klachten je leven daadwerkelijk beperken.</p>
+        </ArticleTocSection>
+
+        <ArticleTocSection id="stel-vragen" heading="Stel alle vragen die je hebt">
+          <p>Jouw vragen zijn een belangrijk onderdeel van de afspraak. Schrijf ze vooraf op en begin met de vragen die voor jou het belangrijkst zijn.</p>
+          <p>Mogelijke vragen zijn:</p>
+          <ul><li>Welke oorzaken kunnen bij mijn klachten passen?</li><li>Zou endometriose of adenomyose een mogelijke oorzaak kunnen zijn?</li><li>Is aanvullend onderzoek nodig?</li><li>Kunnen we nu al iets proberen om mijn klachten te verminderen?</li><li>Wat zijn de voordelen, nadelen en mogelijke bijwerkingen?</li><li>Wanneer wordt een verwijzing naar een gynaecoloog overwogen?</li><li>Wat kan ik doen terwijl ik op onderzoek of een vervolgafspraak wacht?</li><li>Wanneer moet ik opnieuw contact opnemen?</li><li>Wat gebeurt er als mijn klachten niet verbeteren?</li><li>Wat betekent een behandeling voor een huidige of toekomstige kinderwens?</li></ul>
+          <p>Je hoeft niet alle vragen uit deze lijst te stellen. Kies de vragen die voor jouw situatie belangrijk zijn.</p>
+          <p>Begrijp je een uitleg niet? Vraag gerust:</p>
+          <ul><li>"Kunt u dat in eenvoudigere woorden uitleggen?"</li><li>"Kunt u een voorbeeld geven?"</li><li>"Wilt u dat nog een keer herhalen?"</li><li>"Kan ik dit ergens nalezen?"</li></ul>
+          <p>Je mag altijd om uitleg vragen. Het is de bedoeling dat jij begrijpt wat er wordt besproken en wat de mogelijke vervolgstappen zijn.</p>
+        </ArticleTocSection>
+
+        <ArticleTocSection id="maak-plan" heading="Maak samen een concreet plan">
+          <p>Zorg dat je voor het einde van de afspraak weet wat de volgende stap is.</p>
+          <p>Bespreek bijvoorbeeld:</p>
+          <ul><li>wat de huisarts op dit moment denkt;</li><li>of er onderzoek nodig is;</li><li>of je een behandeling of medicijn gaat proberen;</li><li>wanneer je hiervan effect kunt verwachten;</li><li>welke bijwerkingen belangrijk zijn;</li><li>wanneer de afspraak wordt geëvalueerd;</li><li>wanneer een verwijzing wordt overwogen;</li><li>wat je moet doen als de klachten erger worden;</li><li>hoe en wanneer je een uitslag ontvangt.</li></ul>
+          <p>Vraag of de belangrijkste afspraken kunnen worden opgeschreven. Je kunt ze ook zelf noteren of laten opschrijven door degene die met je mee is.</p>
+          <p><strong>Aandachtspunt</strong></p>
+          <p>Ga indien mogelijk niet weg zonder antwoord op deze drie vragen:</p>
+          <ol><li>Wat is nu de volgende stap?</li><li>Wanneer bespreken we of deze stap voldoende helpt?</li><li>Wat kan ik doen als mijn klachten eerder erger worden?</li></ol>
+          <h3>Wat als je je niet gehoord voelt?</h3>
+          <p>Het kan gebeuren dat je na het gesprek het gevoel hebt dat de invloed van je klachten nog niet duidelijk is.</p>
+          <p>Probeer dan concreet te benoemen:</p>
+          <ul><li>welke activiteiten niet meer lukken;</li><li>hoe vaak je door de klachten thuisblijft;</li><li>hoeveel pijn of bloedverlies je ervaart;</li><li>hoe lang de klachten al bestaan;</li><li>wat je al hebt geprobeerd;</li><li>waar je je zorgen over maakt.</li></ul>
+          <p>Je kunt vragen:</p>
+          <ul><li>waarom verder onderzoek of een verwijzing op dit moment wel of niet passend is;</li><li>wanneer de situatie opnieuw wordt beoordeeld;</li><li>bij welke veranderingen je eerder contact moet opnemen;</li><li>welke andere mogelijkheden er zijn.</li></ul>
+          <p>Kom je er in één gesprek niet uit? Maak dan een vervolgafspraak. Je kunt opnieuw iemand meenemen of bespreken of een verwijzing of tweede mening in jouw situatie passend is.</p>
+          <p>Voor jezelf opkomen betekent niet dat je tegenover je huisarts staat. Het doel is om samen duidelijk te krijgen welke zorg nu nodig is.</p>
+        </ArticleTocSection>
+
+        <ArticleTocSection id="na-afspraak" heading="Na de afspraak">
+          <p>Neem na het gesprek even de tijd om terug te kijken.</p>
+          <p>Controleer of je weet:</p>
+          <ul><li>wat er is afgesproken;</li><li>wat je zelf gaat doen;</li><li>of en wanneer je met een behandeling begint;</li><li>wanneer je een uitslag krijgt;</li><li>wanneer de volgende afspraak is;</li><li>wanneer je eerder contact moet opnemen.</li></ul>
+          <p>Bespreek de afspraak eventueel met degene die mee was. Schrijf onduidelijkheden of nieuwe vragen op voor een volgend gesprek.</p>
+          <p>Blijf je klachten bijhouden wanneer dat onderdeel is van het afgesproken plan. Neem eerder contact op wanneer je klachten duidelijk veranderen of erger worden.</p>
+        </ArticleTocSection>
+
+        <MedicalReview date="[datum invullen]" reviewer="[naam en functie invullen]" note="Deze informatie helpt je om een gesprek voor te bereiden en vervangt geen persoonlijk medisch advies." />
+        <ArticleShare />
+      </ArticleTocLayout>
+    </section>
     <RelatedArticles cards={doctorVisitRelated} />
   </main><Footer /></>;
 }
